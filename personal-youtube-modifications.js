@@ -214,7 +214,7 @@ function initWatch() {
     if (window.location.href.includes('/watch')) {
         // on video lazy-load
         var lazyWatchObserver = new MutationObserver(function(mutations, observer) {
-            if (document.getElementsByClassName('html5-main-video')[0] !== undefined && document.querySelector('.ytp-endscreen-content') != undefined) {
+            if (document.getElementsByClassName('html5-main-video')[0] !== undefined && document.querySelector('.ytp-endscreen-content') != undefined && document.querySelector('#items.ytd-watch-next-secondary-results-renderer') != undefined) {
 
 
                 // one-time
@@ -246,7 +246,7 @@ function initWatch() {
                 });
                 fullscreenObserver.observe(document.querySelector('.html5-video-player'), {attributes: true});
 
-                // re-scale and enforce endscreen content (next few functions/observers)
+                // re-scale and enforce endscreen content (next few functions/observers) (!currently broken??!)
                 var endscreenWrapper = document.querySelector('.ytp-endscreen-content');
                 function formatEndscreenWrapper() {
                     endscreenWrapper.style.setProperty('top', '0%');
@@ -330,14 +330,28 @@ function initWatch() {
                     };
                 };
 
-
                 oldVideoChapterWidth = document.querySelector('.ytp-chapters-container').clientWidth;
 
+                // on new reccomended videos load
+                var lastReccomendedCount = 0;
+                var reccomendedLoadObserver = new MutationObserver(function() {
+                    if (lastReccomendedCount != document.querySelector('#items.ytd-watch-next-secondary-results-renderer').querySelectorAll('ytd-compact-video-renderer').length) {
+                        document.querySelector('#items.ytd-watch-next-secondary-results-renderer').querySelectorAll('ytd-compact-video-renderer').forEach(function(element) {
+                            // remove annoying popups on /watch reccomended videos
+                            element.querySelector('#hover-overlays').style.setProperty('display', 'none');
+                        });
+                    };
+                });
 
                 // on-new-video
                 var newVidObserver = new MutationObserver(function() {
                     if (window.location.search != lastArgs) {
                         lastArgs = window.location.search;
+
+                        // relaunch reccomendedLoadObserver
+                        lastReccomendedCount = document.querySelector('#items.ytd-watch-next-secondary-results-renderer').querySelectorAll('ytd-compact-video-renderer').length;
+                        reccomendedLoadObserver.disconnect();
+                        reccomendedLoadObserver.observe(document.querySelector('#items.ytd-watch-next-secondary-results-renderer'), {attributes: true, subtree: true})
 
                         calculateChapterWidths(); // must wait until loaded?
                         startedForceChapterWidth = false; // maybe after next line?
