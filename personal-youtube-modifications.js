@@ -84,6 +84,17 @@ function fixHomepage() {
     document.querySelectorAll('#hover-overlays.ytd-thumbnail').forEach(function(hover) {
         hover.style.setProperty('display', 'none');
     });
+
+    // remove home, trending, subscriptions, and library buttons on app-bar
+    document.querySelector('#header.ytd-guide-collapsible-section-entry-renderer').style.setProperty('display', 'none');
+    document.querySelectorAll('#sections.ytd-guide-renderer > *.ytd-guide-renderer:first-child > #items > ytd-guide-entry-renderer').forEach(function(element) {
+        element.style.setProperty('display', 'none');
+    })
+
+    // move app-bar alignment up
+    document.querySelector('#sections.ytd-guide-renderer > *.ytd-guide-renderer:first-child').style.setProperty('padding-top', '0px');
+    document.querySelector('ytd-guide-renderer.ytd-app').style.setProperty('margin-top', '-12px');
+
 };
 
 
@@ -329,8 +340,10 @@ function initWatch() {
                         });
                     };
                 };
-
                 oldVideoChapterWidth = document.querySelector('.ytp-chapters-container').clientWidth;
+
+                // make view-count font larger
+                document.querySelector('yt-view-count-renderer').style.setProperty('font-size', '1.7rem');
 
                 // on new reccomended videos load
                 var lastReccomendedCount = 0;
@@ -373,12 +386,21 @@ function initWatch() {
 };
 
 
-function initUniversal() {
+function initUniversal() { // calls every new page
+    // masthead on-load
     var mastheadObserver = new MutationObserver(function(mutations, mastheadObserver) {
         if (document.querySelector('ytd-masthead') != undefined) {
+
             // move search bar to the left side of the screen, widen
             document.querySelector('#end.ytd-masthead').style.setProperty('margin-left', 'auto');
             document.querySelector('#center.ytd-masthead').style.setProperty('max-width', '900px');
+            document.querySelector('#guide-button.ytd-masthead').style.setProperty('margin-right', '0px');
+
+            // reset search when moving to new page
+            if (!window.location.href.includes('search_query=')) {
+                document.querySelector('#search-form.ytd-searchbox').reset();
+            };
+
             mastheadObserver.disconnect();
         };
     });
@@ -425,13 +447,7 @@ window.addEventListener('load', function() {
     fixUrl();
 
     lastArgs = null;
-    if (window.location.href == "https://www.youtube.com/") {
-        // initHomepage();
-    };
-    if (window.location.href.includes('/watch')) {
-        // initWatch();
-    }
-    initUniversal();
+    var lastUrl;
     var observer = new MutationObserver(function(mutations) {
         // youtube homepage changes
         if (window.location.href == "https://www.youtube.com/" && !startedHomepage) {
@@ -440,25 +456,17 @@ window.addEventListener('load', function() {
         };
 
         // youtube.com/watch changes
-        /*
-        if (window.location.href.includes('/watch')) {
-            if (!startedWatch) {
-                startedWatch = true;
-                initWatch();
-                lastVidSrc = document.getElementsByClassName('html5-main-video')[0].src;
-            };
-            if (window.location.search != lastArgs) {
-                lastArgs = window.location.search;
-                initWatch(); // maybe just fixWatch() direct?
-                lastVidSrc = document.getElementsByClassName('html5-main-video')[0].src;
-            };
-        };
-        */
         if (window.location.href.includes('/watch') && !startedWatch) {
             startedWatch = true;
             initWatch();
             lastVidSrc = document.getElementsByClassName('html5-main-video')[0].src;
         };
+
+        //universial changes
+        if (lastUrl != window.location.href) {
+            initUniversal();
+        };
+        lastUrl = window.location.href;
 
     });
     observer.observe(document.querySelector("body"), {childList: true, subtree: true});
