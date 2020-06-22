@@ -172,7 +172,7 @@ function fixWatch() {
             chapter.style.setProperty('width', chapterWidth);
             index++;
         });
-        // document.querySelector('.ytp-chapters-container').querySelector('.ytp-chapter-hover-container').style.setProperty('display', 'none'); // display: block to original scrubber bar
+        // document.querySelector('.ytp-chapters-container').querySelector('.ytp-chapter-hover-container').style.setProperty('display', 'none'); // display: none to original scrubber bar
     };
     /*
     // correct chapters if video has no chapters
@@ -359,6 +359,19 @@ function initWatch() {
 };
 
 
+function initUniversal() {
+    var mastheadObserver = new MutationObserver(function(mutations, mastheadObserver) {
+        if (document.querySelector('ytd-masthead') != undefined) {
+            // move search bar to the left side of the screen, widen
+            document.querySelector('#end.ytd-masthead').style.setProperty('margin-left', 'auto');
+            document.querySelector('#center.ytd-masthead').style.setProperty('max-width', '900px');
+            mastheadObserver.disconnect();
+        };
+    });
+    mastheadObserver.observe(document.querySelector('body'), {attributes: true, subtree: true});
+};
+
+
 function fixUrl() {
     var url = window.location.href;
     var urlNeedsUpdate = false;
@@ -404,6 +417,7 @@ window.addEventListener('load', function() {
     if (window.location.href.includes('/watch')) {
         // initWatch();
     }
+    initUniversal();
     var observer = new MutationObserver(function(mutations) {
         // youtube homepage changes
         if (window.location.href == "https://www.youtube.com/" && !startedHomepage) {
