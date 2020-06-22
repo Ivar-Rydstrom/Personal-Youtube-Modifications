@@ -19,6 +19,8 @@ var lastArgs;
 var lastVidSrc;
 var oldVideoChapterWidth;
 var startedForceChapterWidth = false;
+var chapterWidths;
+var fullscreenMode = false;
 
 // various changes to the YouTube Homepage layout
 function fixHomepage() {
@@ -84,7 +86,7 @@ function fixHomepage() {
     });
 };
 
-var startedChapterBlocks = false;
+
 function fixWatch() {
     // change video width/height
     var defaultPlayerWidth = Number(document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('width').replace('px', ''));
@@ -92,7 +94,7 @@ function fixWatch() {
     var scaleRatio = newVideoWidth/defaultPlayerWidth;
     var newPlayerHeight = defaultPlayerHeight*scaleRatio;
 
-    var primaryStyle = `--ytd-watch-flexy-max-player-width:${newVideoWidth}px;--ytd-watch-flexy-max-player-height:${newVideoHeight}px;--ytd-watch-flexy-min-player-width:${newVideoWidth}px;--ytd-watch-flexy-max-player-height:${newVideoHeight}px;`;
+    var primaryStyle = `--ytd-watch-flexy-max-player-width:${newVideoWidth}px;--ytd-watch-flexy-max-player-height:${newVideoHeight}px;--ytd-watch-flexy-min-player-width:${newVideoWidth}px;--ytd-watch-flexy-min-player-height:${newVideoHeight}px;max-width:${newVideoWidth}px`;
     if (document.querySelector('#primary.ytd-watch-flexy') != undefined) {
         document.querySelector('#primary.ytd-watch-flexy').setAttribute('style', primaryStyle);
     };
@@ -104,17 +106,28 @@ function fixWatch() {
     wrapper.style.setProperty('width', `${newVideoWidth}px`);
     wrapper.style.setProperty('height', `${newVideoHeight}px`);
 
-    document.getElementsByClassName('html5-main-video')[0].style.width = `${newVideoWidth}px`;
-    document.getElementsByClassName('html5-main-video')[0].style.height = `${newVideoHeight}px`;
-    document.getElementsByClassName('ytp-chrome-bottom')[0].style.width = `${newVideoWidth - 24}px`;
-    document.getElementsByClassName('ytp-chapter-hover-container')[0].style.width = `${newVideoWidth - 24}px`;
+    if (!fullscreenMode) { // standard player
+        document.getElementsByClassName('html5-main-video')[0].style.width = `${newVideoWidth}px`;
+        document.getElementsByClassName('html5-main-video')[0].style.height = `${newVideoHeight}px`;
+        document.getElementsByClassName('html5-main-video')[0].style.setProperty('left', '0px');
+        document.getElementsByClassName('ytp-chrome-bottom')[0].style.width = `${newVideoWidth - 24}px`;
+        document.getElementsByClassName('ytp-chapter-hover-container')[0].style.width = `${newVideoWidth - 24}px`;
+    } else { // fullscreen mode
+        document.querySelector('.html5-video-player').style.setProperty('width', '100%');
+        document.querySelector('.html5-video-player').style.setProperty('height', '100%');
+        document.querySelector('.html5-main-video').style.setProperty('width', `${screen.width}px`);
+        document.querySelector('.html5-main-video').style.setProperty('height', `${screen.height}px`);
+        document.querySelector('.ytp-chrome-bottom').style.width = `${screen.width - 48}px`;
+        document.querySelector('ytp-chapter-hover-container').style.width = `${screen.width - 48}px`;
+    };
 
+    /*
     // rescale chapter blocks if present
     var chapterBlocks = new MutationObserver(function(mutations, observer) {
         var correctFirstWidth;
         function setNewChapterWidths() {
             if (document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length > 1) {
-                var chapterScaleRatio = (newVideoWidth - 24)/oldVideoChapterWidth;
+
                 GM_log('ratio: ',chapterScaleRatio);
                 document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').forEach(function(chapter) {
                     var chapterWidth = Math.round(Number(chapter.style.getPropertyValue('width').replace('px', ''))*chapterScaleRatio);
@@ -149,7 +162,24 @@ function fixWatch() {
     if (document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length == 1) {
         document.querySelector('.ytp-chapters-container').querySelector('.ytp-chapter-hover-container').style.removeProperty('display');
     };
+    */
 
+    // update scrubber chapter widths if present
+    if (document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length > 1) {
+        var index = 0;
+        document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').forEach(function(chapter) {
+            var chapterWidth = chapterWidths[index];
+            chapter.style.setProperty('width', chapterWidth);
+            index++;
+        });
+        // document.querySelector('.ytp-chapters-container').querySelector('.ytp-chapter-hover-container').style.setProperty('display', 'none'); // display: block to original scrubber bar
+    };
+    /*
+    // correct chapters if video has no chapters
+    if (document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length == 1) {
+        document.querySelector('.ytp-chapters-container').querySelector('.ytp-chapter-hover-container').style.removeProperty('display');
+    };
+    */
 };
 
 
@@ -159,11 +189,11 @@ function initHomepage () {
         fixHomepage();
         var observer = new MutationObserver(function(mutations) {
             // preload LOTS of videos (more usable with 6-vids across)
-            if (!document.querySelector('ytd-rich-grid-renderer').getAttribute('style').includes('--ytd-rich-grid-items-per-row: 20') && document.querySelectorAll('ytd-rich-item-renderer').length < 40) {
+            if (!document.querySelector('ytd-rich-grid-renderer').getAttribute('style').includes('--ytd-rich-grid-items-per-row: 20') && document.querySelectorAll('ytd-rich-item-renderer').length < 60) {
                 document.querySelector('ytd-rich-grid-renderer').setAttribute('style', '--ytd-rich-grid-items-per-row: 20');
                 startedHomepage = true;
             };
-            if (!document.querySelector('ytd-rich-grid-renderer').getAttribute('style').includes('--ytd-rich-grid-items-per-row: 6') && document.querySelectorAll('ytd-rich-item-renderer').length >= 40) {
+            if (!document.querySelector('ytd-rich-grid-renderer').getAttribute('style').includes('--ytd-rich-grid-items-per-row: 6') && document.querySelectorAll('ytd-rich-item-renderer').length >= 60) {
                 startedHomepage = true;
                 fixHomepage();
             };
@@ -180,28 +210,43 @@ function initHomepage () {
 
 
 function initWatch() {
+    GM_log('initwatch');
     if (window.location.href.includes('/watch')) {
         // on video lazy-load
-        var observer = new MutationObserver(function(mutations, observer) {
+        var lazyWatchObserver = new MutationObserver(function(mutations, observer) {
             if (document.getElementsByClassName('html5-main-video')[0] !== undefined && document.querySelector('.ytp-endscreen-content') != undefined) {
 
-                // on new video
-                if (document.getElementsByClassName('html5-main-video')[0] !== lastVidSrc) {
-                    GM_log('here')
-                    oldVideoChapterWidth = document.querySelector('.ytp-chapters-container').clientWidth;
-                    startedForceChapterWidth = false;
-                    fixWatch();
-                };
+
+                // one-time
 
                 // force update when video dimentions change back to default vlaues
                 var vidObserver = new MutationObserver(function(mutations, vidObserver) {
-                    if (document.getElementsByClassName('html5-main-video')[0].style.width != `${newVideoWidth}px`) {
+                    if (document.getElementsByClassName('html5-main-video')[0].style.width != `${newVideoWidth}px` && !fullscreenMode) {
                         fixWatch();
                     };
                 });
                 vidObserver.observe(document.getElementsByClassName('html5-main-video')[0], {attributes: true});
 
-                // re-scale endscreen content (next few functions/observers)
+                // handle fullscreen mode
+                var updatedFullscreen = false;
+                var fullscreenObserver = new MutationObserver(function(mutations, fullscreenObserver) {
+                    if (document.querySelector('#player-theater-container').querySelector('video') != undefined) {
+                            if (!updatedFullscreen && document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('width') != `${screen.width}px`) {
+                                updatedFullscreen = true;
+                                fullscreenMode = true;
+                                fixWatch();
+                            };
+                    } else {
+                        if (updatedFullscreen) {
+                            updatedFullscreen = false;
+                            fullscreenMode = false;
+                            fixWatch();
+                        };
+                    };
+                });
+                fullscreenObserver.observe(document.querySelector('.html5-video-player'), {attributes: true});
+
+                // re-scale and enforce endscreen content (next few functions/observers)
                 var endscreenWrapper = document.querySelector('.ytp-endscreen-content');
                 function formatEndscreenWrapper() {
                     endscreenWrapper.style.setProperty('top', '0%');
@@ -238,11 +283,78 @@ function initWatch() {
                 });
                 forceEndscreenWrapperDims.observe(endscreenWrapper, {attributes: true, subtree: true});
 
-                // video on-lazy-load disconnector
+                // get original chapter widths (if chapters get loaded)
+                var originalChapterWidths = [];
+                var initialSampleTaken = false;
+                var perVidChapterObserver = new MutationObserver(function(mutations, perVidChapterObserver) {
+                    function getOrig() {
+                     var index = 0;
+                        document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').forEach(function(chapter) {
+                            originalChapterWidths[index] = Number(chapter.style.getPropertyValue('width').replace('px', '').replace('%',''));
+                            index++;
+                        });
+                    }
+                    if (document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length > 1) {
+                        getOrig();
+                        perVidChapterObserver.disconnect();
+                    };
+                    if (!initialSampleTaken) {
+                        initialSampleTaken = true;
+                        getOrig();
+                    };
+                });
+                perVidChapterObserver.observe(document.querySelector('.ytp-chapters-container'), {attributes: true, subtree: true});
+                var chapterBlocksObserver = new MutationObserver(function() {
+                    var hoverContainerWidth = document.querySelector('.ytp-chapter-hover-container').style.getPropertyValue('width');
+                    GM_log(hoverContainerWidth);
+                    GM_log(`${originalChapterWidths[0]}px`);
+                    if ((hoverContainerWidth == `${originalChapterWidths[0]}px` || hoverContainerWidth == `${originalChapterWidths[0]}%`) && document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length > 1) {
+                        GM_log('upadated chapter widths (hopefully not too frequently???');
+                        calculateChapterWidths();
+                        fixWatch();
+                    };
+                });
+                chapterBlocksObserver.observe(document.querySelector('.ytp-chapter-hover-container'), {attributes: true});
+
+                 // recalculates chapter widths and places them inside [chapterWidths]
+                function calculateChapterWidths() {
+                    if (document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length > 1) {
+                        chapterWidths = [];
+                        var chapterScaleRatio = (newVideoWidth - 24)/oldVideoChapterWidth;
+                        var index = 0;
+                        document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').forEach(function(chapter) {
+                            var chapterWidth = Math.floor(originalChapterWidths[index]*chapterScaleRatio);
+                            chapterWidths[index] = `${chapterWidth}px`;
+                            index++;
+                        });
+                    };
+                };
+
+
+                oldVideoChapterWidth = document.querySelector('.ytp-chapters-container').clientWidth;
+
+
+                // on-new-video
+                var newVidObserver = new MutationObserver(function() {
+                    if (window.location.search != lastArgs) {
+                        lastArgs = window.location.search;
+
+                        calculateChapterWidths(); // must wait until loaded?
+                        startedForceChapterWidth = false; // maybe after next line?
+                        fixWatch();
+                        lastVidSrc = document.getElementsByClassName('html5-main-video')[0].src;
+
+                    };
+                });
+                newVidObserver.observe(document.querySelector("body"), {childList: true, subtree: true});
+
+
+
+                // on video lazy-load disconnector
                 observer.disconnect();
             };
         });
-        observer.observe(document.querySelector("body"), {childList: true, subtree: true});
+        lazyWatchObserver.observe(document.querySelector("body"), {childList: true, subtree: true});
     };
 };
 
@@ -275,7 +387,7 @@ function fixUrl() {
     };
     if (!urlUpdated && urlNeedsUpdate) {
         urlUpdated = true;
-        window.location.href = url;
+        // window.location.href = url;
     };
 };
 
@@ -285,7 +397,7 @@ window.addEventListener('load', function() {
     // abort annoying /watch url arguments
     fixUrl();
 
-    lastArgs = window.location.search;
+    lastArgs = null;
     if (window.location.href == "https://www.youtube.com/") {
         // initHomepage();
     };
@@ -300,6 +412,7 @@ window.addEventListener('load', function() {
         };
 
         // youtube.com/watch changes
+        /*
         if (window.location.href.includes('/watch')) {
             if (!startedWatch) {
                 startedWatch = true;
@@ -311,6 +424,12 @@ window.addEventListener('load', function() {
                 initWatch(); // maybe just fixWatch() direct?
                 lastVidSrc = document.getElementsByClassName('html5-main-video')[0].src;
             };
+        };
+        */
+        if (window.location.href.includes('/watch') && !startedWatch) {
+            startedWatch = true;
+            initWatch();
+            lastVidSrc = document.getElementsByClassName('html5-main-video')[0].src;
         };
 
     });
