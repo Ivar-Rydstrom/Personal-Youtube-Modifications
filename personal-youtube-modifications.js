@@ -21,6 +21,8 @@ var oldVideoChapterWidth;
 var startedForceChapterWidth = false;
 var chapterWidths;
 var fullscreenMode = false;
+var defaultPlayerWidth;
+var defaultPlayerHeight;
 
 // various changes to the YouTube Homepage layout
 function fixHomepage() {
@@ -100,11 +102,6 @@ function fixHomepage() {
 
 function fixWatch() {
     // change video width/height
-    var defaultPlayerWidth = Number(document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('width').replace('px', ''));
-    var defaultPlayerHeight = Number(document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('height').replace('px', ''));
-    var scaleRatio = newVideoWidth/defaultPlayerWidth;
-    var newPlayerHeight = defaultPlayerHeight*scaleRatio;
-
     var primaryStyle = `--ytd-watch-flexy-max-player-width:${newVideoWidth}px;--ytd-watch-flexy-max-player-height:${newVideoHeight}px;--ytd-watch-flexy-min-player-width:${newVideoWidth}px;--ytd-watch-flexy-min-player-height:${newVideoHeight}px;max-width:${newVideoWidth}px`;
     if (document.querySelector('#primary.ytd-watch-flexy') != undefined) {
         document.querySelector('#primary.ytd-watch-flexy').setAttribute('style', primaryStyle);
@@ -116,14 +113,38 @@ function fixWatch() {
     var wrapper = document.getElementsByClassName('html5-video-player')[0];
     wrapper.style.setProperty('width', `${newVideoWidth}px`);
     wrapper.style.setProperty('height', `${newVideoHeight}px`);
+    document.querySelector('#player-container-inner').style.setProperty('padding-top', '0px');
+
+    // rescale framepreview content
+    var somethingRatio = newVideoHeight/defaultPlayerHeight;
+    document.querySelector('.ytp-storyboard-framepreview').style.setProperty('margin', 'auto');
+    document.querySelector('.ytp-storyboard-framepreview').style.setProperty('position', 'relative');
+    document.querySelector('.ytp-storyboard-framepreview-img').style.setProperty('transform', `scale(${somethingRatio})`);
+    document.querySelector('.ytp-storyboard-framepreview-img').style.setProperty('transform-origin', 'left top');
 
     if (!fullscreenMode) { // standard player
+        // rescale main video and progress bar
         document.getElementsByClassName('html5-main-video')[0].style.width = `${newVideoWidth}px`;
         document.getElementsByClassName('html5-main-video')[0].style.height = `${newVideoHeight}px`;
         document.getElementsByClassName('html5-main-video')[0].style.setProperty('left', '0px');
-        document.getElementsByClassName('ytp-chrome-bottom')[0].style.width = `${newVideoWidth - 24}px`;
+        document.getElementsByClassName('ytp-chrome-bottom')[0].style.width = `${newVideoWidth - 24 + 4}px`;
         document.getElementsByClassName('ytp-chapter-hover-container')[0].style.width = `${newVideoWidth - 24}px`;
+
+        // rescale all end-cards
+        document.querySelectorAll('.ytp-ce-element').forEach(function(element) {
+            if (element.getAttribute('orig-width') == undefined) {
+                element.setAttribute('orig-width', element.style.width);
+                element.setAttribute('orig-height', element.style.height);
+                element.setAttribute('orig-left', element.style.left);
+                element.setAttribute('orig-top', element.style.top);
+            };
+            element.style.width = `${element.getAttribute('orig-width').replace('px', '') * somethingRatio}px`;
+            element.style.height = `${element.getAttribute('orig-height').replace('px', '') * somethingRatio}px`;
+            element.style.left = `${element.getAttribute('orig-left').replace('px', '') * somethingRatio}px`;
+            element.style.top = `${element.getAttribute('orig-top').replace('px', '') * somethingRatio}px`;
+        });
     } else { // fullscreen mode
+        // rescale main video and progress bar
         document.querySelector('.html5-video-player').style.setProperty('width', '100%');
         document.querySelector('.html5-video-player').style.setProperty('height', '100%');
         document.querySelector('.html5-main-video').style.setProperty('width', `${screen.width}px`);
@@ -131,49 +152,6 @@ function fixWatch() {
         document.querySelector('.ytp-chrome-bottom').style.width = `${screen.width - 48}px`;
         document.querySelector('ytp-chapter-hover-container').style.width = `${screen.width - 48}px`;
     };
-
-    /*
-    // rescale chapter blocks if present
-    var chapterBlocks = new MutationObserver(function(mutations, observer) {
-        var correctFirstWidth;
-        function setNewChapterWidths() {
-            if (document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length > 1) {
-
-                GM_log('ratio: ',chapterScaleRatio);
-                document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').forEach(function(chapter) {
-                    var chapterWidth = Math.round(Number(chapter.style.getPropertyValue('width').replace('px', ''))*chapterScaleRatio);
-                    chapter.style.setProperty('width', `${chapterWidth}px`);
-                });
-                document.querySelector('.ytp-chapters-container').querySelector('.ytp-chapter-hover-container').style.setProperty('display', 'none');
-                correctFirstWidth = Number(document.querySelector('.ytp-chapters-container').querySelector('.ytp-chapter-hover-container').style.getPropertyValue('width').replace('px', ''));
-                observer.disconnect();
-            };
-        };
-        setNewChapterWidths();
-        // correct if chapter widths revert or are updated
-        if (!startedForceChapterWidth) {
-            startedForceChapterWidth = true;
-            var forceChapterWidth = new MutationObserver(function() {
-                if (correctFirstWidth != Number(document.querySelector('.ytp-chapters-container').querySelector('.ytp-chapter-hover-container').style.getPropertyValue('width').replace('px', ''))) {
-                    GM_log('forced');
-                    setNewChapterWidths();
-                };
-            });
-            forceChapterWidth.observe(document.querySelector('.ytp-chapters-container'), {attributes: true, subtree: true});
-        };
-    });
-    if (urlUpdated) {
-        chapterBlocks.observe(document.querySelector('.ytp-chapters-container'), {attributes: true, subtree: true})
-    };
-    if (!startedChapterBlocks) {
-        startedChapterBlocks = true;
-        chapterBlocks.observe(document.querySelector('.ytp-chapters-container'), {attributes: true, subtree: true})
-    };
-    // correct if video has no chapters
-    if (document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length == 1) {
-        document.querySelector('.ytp-chapters-container').querySelector('.ytp-chapter-hover-container').style.removeProperty('display');
-    };
-    */
 
     // update scrubber chapter widths if present
     if (document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length > 1) {
@@ -229,6 +207,11 @@ function initWatch() {
 
 
                 // one-time
+
+                // set default height/width of video
+                defaultPlayerWidth = Number(document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('width').replace('px', ''));
+                GM_log('default_width: ', defaultPlayerWidth)
+                defaultPlayerHeight = Number(document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('height').replace('px', ''));
 
                 // force update when video dimentions change back to default vlaues
                 var vidObserver = new MutationObserver(function(mutations, vidObserver) {
@@ -364,7 +347,19 @@ function initWatch() {
                         // relaunch reccomendedLoadObserver
                         lastReccomendedCount = document.querySelector('#items.ytd-watch-next-secondary-results-renderer').querySelectorAll('ytd-compact-video-renderer').length;
                         reccomendedLoadObserver.disconnect();
-                        reccomendedLoadObserver.observe(document.querySelector('#items.ytd-watch-next-secondary-results-renderer'), {attributes: true, subtree: true})
+                        reccomendedLoadObserver.observe(document.querySelector('#items.ytd-watch-next-secondary-results-renderer'), {attributes: true, subtree: true});
+
+                        // wait for framepreview width to be defined to center framepreview
+                        var somethingRatio = newVideoHeight/defaultPlayerHeight;
+                        var framepreviewObserver = new MutationObserver(function(mutations, observer) {
+                            if (document.querySelector('.ytp-storyboard-framepreview').style.display !== 'none') {
+                                GM_log('element; ', document.querySelector('.ytp-storyboard-framepreview-img'));
+                                GM_log('foowid: ', window.getComputedStyle(document.querySelector('.ytp-storyboard-framepreview-img')) );
+                                document.querySelector('.ytp-storyboard-framepreview').style.setProperty('width', `${window.getComputedStyle(document.querySelector('.ytp-storyboard-framepreview-img')).width.replace('px','') * somethingRatio}px`);
+                                observer.disconnect();
+                            };
+                        });
+                        framepreviewObserver.observe(document.querySelector('.ytp-storyboard-framepreview'), {attributes: true});
 
                         calculateChapterWidths(); // must wait until loaded?
                         startedForceChapterWidth = false; // maybe after next line?
@@ -462,7 +457,7 @@ window.addEventListener('load', function() {
             lastVidSrc = document.getElementsByClassName('html5-main-video')[0].src;
         };
 
-        //universial changes
+        // universial changes
         if (lastUrl != window.location.href) {
             initUniversal();
         };
