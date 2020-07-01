@@ -328,6 +328,14 @@ function initWatch() {
                 // make view-count font larger
                 document.querySelector('yt-view-count-renderer').style.setProperty('font-size', '1.7rem');
 
+                // auto-expaand live chat replay box
+                var chatObserver = new MutationObserver(function() {
+                    if (document.querySelector('ytd-live-chat-frame') != undefined && document.querySelector('ytd-live-chat-frame').attributes.hasOwnProperty('collapsed')) {
+                        document.querySelector('ytd-toggle-button-renderer > a > paper-button').click();
+                    };
+                });
+                chatObserver.observe(document.querySelector('#secondary-inner'), {attributes: true, subtree: true});
+
                 // on new reccomended videos load
                 var lastReccomendedCount = 0;
                 var reccomendedLoadObserver = new MutationObserver(function() {
@@ -390,6 +398,9 @@ function initUniversal() { // calls every new page
             document.querySelector('#end.ytd-masthead').style.setProperty('margin-left', 'auto');
             document.querySelector('#center.ytd-masthead').style.setProperty('max-width', '900px');
             document.querySelector('#guide-button.ytd-masthead').style.setProperty('margin-right', '0px');
+
+            // remove opacity from masthead bar
+            document.querySelector('ytd-masthead > #container').style.background = 'white';
 
             // reset search when moving to new page
             if (!window.location.href.includes('search_query=')) {
