@@ -199,7 +199,6 @@ function initHomepage () {
 
 
 function initWatch() {
-    GM_log('initwatch');
     if (window.location.href.includes('/watch')) {
         // on video lazy-load
         var lazyWatchObserver = new MutationObserver(function(mutations, observer) {
@@ -210,7 +209,6 @@ function initWatch() {
 
                 // set default height/width of video
                 defaultPlayerWidth = Number(document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('width').replace('px', ''));
-                GM_log('default_width: ', defaultPlayerWidth)
                 defaultPlayerHeight = Number(document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('height').replace('px', ''));
 
                 // force update when video dimentions change back to default vlaues
@@ -243,6 +241,7 @@ function initWatch() {
                 // re-scale and enforce endscreen content (next few functions/observers) (!currently broken??!)
                 var endscreenWrapper = document.querySelector('.ytp-endscreen-content');
                 function formatEndscreenWrapper() {
+                    endscreenWrapper = document.querySelector('.ytp-endscreen-content');
                     endscreenWrapper.style.setProperty('top', '0%');
                     endscreenWrapper.style.setProperty('left', '0%');
                     endscreenWrapper.style.setProperty('margin-top', '0px');
@@ -275,7 +274,6 @@ function initWatch() {
                         });
                     };
                 });
-                forceEndscreenWrapperDims.observe(endscreenWrapper, {attributes: true, subtree: true});
 
                 // get original chapter widths (if chapters get loaded)
                 var originalChapterWidths = [];
@@ -300,8 +298,6 @@ function initWatch() {
                 perVidChapterObserver.observe(document.querySelector('.ytp-chapters-container'), {attributes: true, subtree: true});
                 var chapterBlocksObserver = new MutationObserver(function() {
                     var hoverContainerWidth = document.querySelector('.ytp-chapter-hover-container').style.getPropertyValue('width');
-                    GM_log(hoverContainerWidth);
-                    GM_log(`${originalChapterWidths[0]}px`);
                     if ((hoverContainerWidth == `${originalChapterWidths[0]}px` || hoverContainerWidth == `${originalChapterWidths[0]}%`) && document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length > 1) {
                         GM_log('upadated chapter widths (hopefully not too frequently???');
                         calculateChapterWidths();
@@ -350,6 +346,7 @@ function initWatch() {
                 // on-new-video
                 var newVidObserver = new MutationObserver(function() {
                     if (window.location.search != lastArgs) {
+                        GM_log('new vid');
                         lastArgs = window.location.search;
 
                         // relaunch reccomendedLoadObserver
@@ -357,12 +354,21 @@ function initWatch() {
                         reccomendedLoadObserver.disconnect();
                         reccomendedLoadObserver.observe(document.querySelector('#items.ytd-watch-next-secondary-results-renderer'), {attributes: true, subtree: true});
 
+                        // relaunch endscreen controller observer
+                        forceEndscreenWrapperDims.disconnect();
+                        var endscreenLoad = new MutationObserver(function(mutations, observer) {
+                            if (document.querySelector('.ytp-endscreen-content') != undefined) {
+                                GM_log('node: ', document.querySelector('.ytp-endscreen-content'))
+                                forceEndscreenWrapperDims.observe(document.querySelector('.ytp-endscreen-content'), {attributes: true, subtree: true});
+                                observer.disconnect();
+                            };
+                        });
+                        endscreenLoad.observe(document.querySelector('body'), {attributes: true, subtree: true});
+
                         // wait for framepreview width to be defined to center framepreview
                         var somethingRatio = newVideoHeight/defaultPlayerHeight;
                         var framepreviewObserver = new MutationObserver(function(mutations, observer) {
                             if (document.querySelector('.ytp-storyboard-framepreview').style.display !== 'none') {
-                                GM_log('element; ', document.querySelector('.ytp-storyboard-framepreview-img'));
-                                GM_log('foowid: ', window.getComputedStyle(document.querySelector('.ytp-storyboard-framepreview-img')) );
                                 document.querySelector('.ytp-storyboard-framepreview').style.setProperty('width', `${window.getComputedStyle(document.querySelector('.ytp-storyboard-framepreview-img')).width.replace('px','') * somethingRatio}px`);
                                 observer.disconnect();
                             };
@@ -442,7 +448,7 @@ function fixUrl() {
     };
     if (!urlUpdated && urlNeedsUpdate) {
         urlUpdated = true;
-        // window.location.href = url;
+        window.location.href = url;
     };
 };
 
