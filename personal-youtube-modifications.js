@@ -27,7 +27,7 @@ var defaultPlayerHeight;
 // various changes to the YouTube Homepage layout
 function fixHomepage() {
     // remove tag searchbar thing
-    var tagBar = document.getElementById('chips-below');
+    var tagBar = document.getElementById('chips');
     tagBar.style.display = 'none';
 
     // remove latest posts thing
@@ -239,9 +239,8 @@ function initWatch() {
                 fullscreenObserver.observe(document.querySelector('.html5-video-player'), {attributes: true});
 
                 // re-scale and enforce endscreen content (next few functions/observers) (!currently broken??!)
-                var endscreenWrapper = document.querySelector('.ytp-endscreen-content');
                 function formatEndscreenWrapper() {
-                    endscreenWrapper = document.querySelector('.ytp-endscreen-content');
+                    var endscreenWrapper = document.querySelector('.ytp-endscreen-content');
                     endscreenWrapper.style.setProperty('top', '0%');
                     endscreenWrapper.style.setProperty('left', '0%');
                     endscreenWrapper.style.setProperty('margin-top', '0px');
@@ -250,7 +249,7 @@ function initWatch() {
                     endscreenWrapper.style.setProperty('width', '100%');
                 };
                 var forceEndscreenWrapperDims = new MutationObserver(function() {
-                    if (endscreenWrapper.style.height !== '100%') {
+                    if (document.querySelector('.ytp-endscreen-content').style.height !== '100%') {
                         formatEndscreenWrapper();
                     };
                     if (document.querySelector('.ytp-endscreen-content').querySelectorAll('a').length > 0) {
@@ -259,7 +258,7 @@ function initWatch() {
                         var endVideoHeight = (newVideoHeight - 49 - 5)/3 - 5;
                         var vertIndex = 0;
                         var horzIndex = 0;
-                        endscreenWrapper.querySelectorAll('a').forEach(function(element) {
+                        document.querySelector('.ytp-endscreen-content').querySelectorAll('a').forEach(function(element) {
                             var top = (endVideoHeight + 5) * vertIndex + 5;
                             var left = (endVideoWidth + 5) * horzIndex + 5;
                             element.style.setProperty('height', `${endVideoHeight}px`);
@@ -346,7 +345,6 @@ function initWatch() {
                 // on-new-video
                 var newVidObserver = new MutationObserver(function() {
                     if (window.location.search != lastArgs) {
-                        GM_log('new vid');
                         lastArgs = window.location.search;
 
                         // relaunch reccomendedLoadObserver
@@ -358,7 +356,6 @@ function initWatch() {
                         forceEndscreenWrapperDims.disconnect();
                         var endscreenLoad = new MutationObserver(function(mutations, observer) {
                             if (document.querySelector('.ytp-endscreen-content') != undefined) {
-                                GM_log('node: ', document.querySelector('.ytp-endscreen-content'))
                                 forceEndscreenWrapperDims.observe(document.querySelector('.ytp-endscreen-content'), {attributes: true, subtree: true});
                                 observer.disconnect();
                             };
@@ -497,3 +494,4 @@ window.addEventListener('load', function() {
 //
 //    window.location.href = url;
 // };
+
