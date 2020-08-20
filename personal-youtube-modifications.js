@@ -332,6 +332,44 @@ function initWatch() {
                 });
                 chatObserver.observe(document.querySelector('#secondary-inner'), {attributes: true, subtree: true});
 
+                // create convenient description collapse button
+                GM_log('here');
+                var container = document.createElement('div');
+                container.style.width = '50px';
+                container.style.display = 'inline-block';
+                container.style.float = 'left';
+                container.id = 'extraExpandContainer';
+                container.innerHTML = '&nbsp';
+                var button = document.createElement('button');
+                button.innerHTML = 'LESS';
+                button.type = 'button';
+                button.style.setProperty('font-size', '1.2rem');
+                button.style.display = 'none';
+                button.onclick = function () { document.querySelector('paper-button#less').click() };
+                var description = document.querySelector('ytd-expander');
+                description.style.display = 'inline-block';
+                description.style.setProperty('margin-left', '13px');
+                container.appendChild(button);
+                document.querySelector('ytd-video-secondary-info-renderer > div#container').appendChild(container);
+                document.querySelector('paper-button#more').addEventListener('click', function() {
+                   button.style.display = 'block';
+                });
+                document.querySelector('paper-button#less').addEventListener('click', function() {
+                    button.style.display = 'none';
+                });
+                /*
+                document.addEventListener('scroll', function() {
+                    var calculatedMargin;
+                    if (button.getBoundingClientRect().top <= document.querySelector('#masthead-container').offsetHeight) {
+                        calculatedMargin = (-1 * button.getBoundingClientRect().top) + document.querySelector('#masthead-container').offsetHeight + 10;
+                    };
+                    if (button.getBoundingClientRect().top > 56) {
+                        calculatedMargin = 0;
+                    }
+                    container.style.setProperty('margin-top', `${calculatedMargin}px`);
+                });
+*/
+
                 // on new reccomended videos load
                 var lastReccomendedCount = 0;
                 var reccomendedLoadObserver = new MutationObserver(function() {
