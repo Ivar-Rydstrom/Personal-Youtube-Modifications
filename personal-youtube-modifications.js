@@ -39,10 +39,9 @@ function fixHomepage() {
 
     // set videos per row to 6, width of video grid to 73% screen width, app drawer width to 10.5%, re-center grid on page
     var inputRenderWidth = 1400/1920*window.innerWidth;
-    var inputDrawerWidth = 200/1920*innerWidth;
     document.querySelector('ytd-rich-grid-renderer').setAttribute('style', `--ytd-rich-grid-items-per-row: 6; width: ${inputRenderWidth}px; margin: auto`);
-    document.querySelector('ytd-app').style.setProperty('--app-drawer-width', `${inputDrawerWidth}px`);
-    document.querySelector('ytd-page-manager').style.setProperty('margin-left', `${inputDrawerWidth}px`);
+    document.querySelector('ytd-app').style.setProperty('--app-drawer-width', '200px');
+    document.querySelector('ytd-page-manager').style.setProperty('margin-left', '200px');
 
     // make video title font size, etc smaller
     document.querySelectorAll('#video-title.ytd-rich-grid-video-renderer').forEach(function(title) {
