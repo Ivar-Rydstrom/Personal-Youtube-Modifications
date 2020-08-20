@@ -37,10 +37,10 @@ function fixHomepage() {
         });
     };
 
-    // set videos per row to 6, width of video grid to 1400px, app drawer width to 200px, re-center grid on page
-    document.querySelector('ytd-rich-grid-renderer').setAttribute('style', '--ytd-rich-grid-items-per-row: 6; width: 1400px; margin: auto');
-    document.querySelector('ytd-app').style.setProperty('--app-drawer-width', '200px');
-    document.querySelector('ytd-page-manager').style.setProperty('margin-left', '200px');
+    // set videos per row to 6, width of video grid to 73%, app drawer width to 10.5%, re-center grid on page
+    document.querySelector('ytd-rich-grid-renderer').setAttribute('style', '--ytd-rich-grid-items-per-row: 6; width: 73%; margin: auto');
+    document.querySelector('ytd-app').style.setProperty('--app-drawer-width', '10.5%');
+    document.querySelector('ytd-page-manager').style.setProperty('margin-left', '10.5%');
 
     // make video title font size, etc smaller
     document.querySelectorAll('#video-title.ytd-rich-grid-video-renderer').forEach(function(title) {
@@ -494,4 +494,3 @@ window.addEventListener('load', function() {
 //
 //    window.location.href = url;
 // };
-
