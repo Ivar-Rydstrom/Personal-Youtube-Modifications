@@ -333,60 +333,63 @@ function initWatch() {
                 chatObserver.observe(document.querySelector('#secondary-inner'), {attributes: true, subtree: true});
 
                 // create convenient description collapse button
-                GM_log('here');
+                // initialize/style button and wrapper container
                 var container = document.createElement('div');
-                container.style.width = '50px';
-                container.style.display = 'inline-block';
-                container.style.float = 'left';
+                container.style.setProperty('width', '50px');
+                container.style.setProperty('display', 'inline-block');
+                container.style.setProperty('float', 'left');
                 container.id = 'extraExpandContainer';
                 container.innerHTML = '&nbsp';
                 var button = document.createElement('button');
                 button.innerHTML = 'LESS';
                 button.type = 'button';
                 button.style.setProperty('font-size', '1.2rem');
-                button.style.display = 'none';
-                button.style.top = `${document.querySelector('#masthead-container').getBoundingClientRect().bottom + 5}px`
-                button.onclick = function () { document.querySelector('paper-button#less').click() };
+                button.style.setProperty('display', 'none');
+                button.style.setProperty('top', `${document.querySelector('#masthead-container').getBoundingClientRect().bottom + 5}px`);
+                button.addEventListener('click', function () { // add click functionality to button
+                    document.querySelector('paper-button#less').click();
+                    if (button.style.position == 'fixed') {
+                        document.querySelector('div#info').scrollIntoView();
+                    };
+                });
                 var description = document.querySelector('ytd-expander');
-                description.style.display = 'inline-block';
+                description.style.setProperty('display', 'inline-block');
                 description.style.setProperty('margin-left', '13px');
                 container.appendChild(button);
                 document.querySelector('ytd-video-secondary-info-renderer > div#container').appendChild(container);
                 var buttonEnabled = false;
-                document.querySelector('paper-button#more').addEventListener('click', function() {
-                    // setButtonDisplay();
-                    button.style.display = 'block';
-                    button.style.position = 'unset';
+                document.querySelector('paper-button#more').addEventListener('click', function() { // inject button on 'show more' click
+                    button.style.setProperty('position', 'unset');
+                    button.style.setProperty('display', 'block');
+                    setButtonDisplay();
                     buttonEnabled = true;
                 });
-                document.querySelector('paper-button#less').addEventListener('click', function() {
-                    button.style.display = 'none';
+                document.querySelector('paper-button#less').addEventListener('click', function() { // remove button on 'show less' click
+                    button.style.setProperty('display', 'none');
+                    if (button.style.position == 'fixed') {
+                        document.querySelector('div#info').scrollIntoView();
+                    };
                     buttonEnabled = false;
                 });
-                document.addEventListener('scroll', function() {
+                document.addEventListener('scroll', function() { // scroll loop for fixed positioning
                     if (buttonEnabled) {
                         setButtonDisplay();
                     };
                 });
-                var last = '';
-                var setButtonDisplay = function() {
-                    if (button.getBoundingClientRect().top <= document.querySelector('#masthead-container').getBoundingClientRect().bottom && last !== 'fixed') {
-                        GM_log('set');
+                var setButtonDisplay = function() { // determines and sets position and display properties for button in scroll loop
+                    if (button.getBoundingClientRect().top <= document.querySelector('#masthead-container').getBoundingClientRect().bottom) {
                         button.style.setProperty('position', 'fixed');
                         button.style.setProperty('display', 'block');
-                        last = 'fixed';
-                    } else if (button.getBoundingClientRect().top > document.querySelector('#masthead-container').getBoundingClientRect().bottom && last !== 'block') {
-                        GM_log('set2');
+                    } else if (button.getBoundingClientRect().top <= document.querySelector('ytd-expander').getBoundingClientRect().top) {
                         button.style.setProperty('position', 'unset');
                         button.style.setProperty('display', 'block');
-                        last = 'block';
                     };
                     if (button.getBoundingClientRect().bottom >= document.querySelector('ytd-video-secondary-info-renderer').getBoundingClientRect().bottom) {
                         button.style.setProperty('position', 'unset');
                         button.style.setProperty('display', 'block');
-                        last = 'block';
                     };
                 };
+
                 // on new reccomended videos load
                 var lastReccomendedCount = 0;
                 var reccomendedLoadObserver = new MutationObserver(function() {
