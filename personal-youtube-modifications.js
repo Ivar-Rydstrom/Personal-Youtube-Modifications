@@ -333,7 +333,7 @@ function initWatch() {
                 chatObserver.observe(document.querySelector('#secondary-inner'), {attributes: true, subtree: true});
 
                 // create convenient description collapse button
-                // initialize/style button and wrapper container
+                // initialize/style button, wrapper container, and inner text
                 var container = document.createElement('div');
                 container.style.setProperty('width', '50px');
                 container.style.setProperty('display', 'inline-block');
@@ -341,17 +341,34 @@ function initWatch() {
                 container.id = 'extraExpandContainer';
                 container.innerHTML = '&nbsp';
                 var button = document.createElement('button');
-                button.innerHTML = 'LESS';
                 button.type = 'button';
-                button.style.setProperty('font-size', '1.2rem');
                 button.style.setProperty('display', 'none');
                 button.style.setProperty('top', `${document.querySelector('#masthead-container').getBoundingClientRect().bottom + 5}px`);
+                button.style.setProperty('height', '200px');
+                button.style.setProperty('width', '50px');
+                button.style.setProperty('border', 'none');
+                button.style.setProperty('cursor', 'pointer');
+                button.classList.add('lessbuttonhover');
+                var buttonStyle = document.createElement('style');
+                var buttonStylesheet = '.lessbuttonhover:hover { background: rgb(170, 170, 170) }';
+                buttonStyle.appendChild(document.createTextNode(buttonStylesheet));
+                document.querySelector('head').appendChild(buttonStyle)
                 button.addEventListener('click', function () { // add click functionality to button
                     document.querySelector('paper-button#less').click();
                     if (button.style.position == 'fixed') {
-                        document.querySelector('div#info').scrollIntoView();
+                        document.querySelector('div#top-row.ytd-video-secondary-info-renderer').scrollIntoView();
                     };
                 });
+                var text = document.createElement('div');
+                text.innerHTML = 'SHOW LESS';
+                text.style.setProperty('transform', 'rotate(-90deg)');
+                text.style.setProperty('transform-origin', '33px 23.5px');
+                text.style.setProperty('white-space', 'nowrap');
+                text.style.setProperty('font-family', 'roboto, arial, sans-serif');
+                text.style.setProperty('font-weight', '500');
+                text.style.setProperty('letter-spacing', '1.6px');
+                text.style.setProperty('word-spacing', '8px');
+                button.appendChild(text);
                 var description = document.querySelector('ytd-expander');
                 description.style.setProperty('display', 'inline-block');
                 description.style.setProperty('margin-left', '13px');
@@ -367,7 +384,7 @@ function initWatch() {
                 document.querySelector('paper-button#less').addEventListener('click', function() { // remove button on 'show less' click
                     button.style.setProperty('display', 'none');
                     if (button.style.position == 'fixed') {
-                        document.querySelector('div#info').scrollIntoView();
+                        document.querySelector('div#top-row.ytd-video-secondary-info-renderer').scrollIntoView();
                     };
                     buttonEnabled = false;
                 });
