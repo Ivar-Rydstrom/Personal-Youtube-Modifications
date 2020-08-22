@@ -336,8 +336,9 @@ function initWatch() {
                 // initialize/style button, wrapper container, and inner text
                 var container = document.createElement('div');
                 container.style.setProperty('width', '50px');
-                container.style.setProperty('display', 'inline-block');
-                container.style.setProperty('float', 'left');
+                container.style.setProperty('position', 'absolute');
+                container.style.setProperty('right', '0px');
+                container.style.setProperty('top', '67px');
                 container.id = 'extraExpandContainer';
                 container.innerHTML = '&nbsp';
                 var button = document.createElement('button');
@@ -372,6 +373,7 @@ function initWatch() {
                 var description = document.querySelector('ytd-expander');
                 description.style.setProperty('display', 'inline-block');
                 description.style.setProperty('margin-left', '13px');
+                document.querySelector('div#container.ytd-video-secondary-info-renderer').style.setProperty('position', 'relative');
                 container.appendChild(button);
                 document.querySelector('ytd-video-secondary-info-renderer > div#container').appendChild(container);
                 var buttonEnabled = false;
@@ -383,6 +385,8 @@ function initWatch() {
                 });
                 document.querySelector('paper-button#less').addEventListener('click', function() { // remove button on 'show less' click
                     button.style.setProperty('display', 'none');
+                    container.style.setProperty('top', '67px');
+                    container.style.removeProperty('bottom');
                     if (button.style.position == 'fixed') {
                         document.querySelector('div#top-row.ytd-video-secondary-info-renderer').scrollIntoView();
                     };
@@ -394,15 +398,21 @@ function initWatch() {
                     };
                 });
                 var setButtonDisplay = function() { // determines and sets position and display properties for button in scroll loop
-                    if (button.getBoundingClientRect().top <= document.querySelector('#masthead-container').getBoundingClientRect().bottom) {
+                    if (button.getBoundingClientRect().top <= document.querySelector('ytd-expander').getBoundingClientRect().top) {
+                        button.style.setProperty('position', 'unset');
+                        button.style.setProperty('display', 'block');
+                        container.style.setProperty('top', '67px');
+                        container.style.removeProperty('bottom');
+                    } else if (button.getBoundingClientRect().top <= document.querySelector('#masthead-container').getBoundingClientRect().bottom && container.style.top) {
                         button.style.setProperty('position', 'fixed');
                         button.style.setProperty('display', 'block');
-                    } else if (button.getBoundingClientRect().top <= document.querySelector('ytd-expander').getBoundingClientRect().top) {
+                    } else if (button.getBoundingClientRect().bottom >= document.querySelector('ytd-video-secondary-info-renderer').getBoundingClientRect().bottom) {
                         button.style.setProperty('position', 'unset');
                         button.style.setProperty('display', 'block');
-                    };
-                    if (button.getBoundingClientRect().bottom >= document.querySelector('ytd-video-secondary-info-renderer').getBoundingClientRect().bottom) {
-                        button.style.setProperty('position', 'unset');
+                        container.style.setProperty('bottom', '0px');
+                        container.style.removeProperty('top');
+                    } else if (button.getBoundingClientRect().top > document.querySelector('#masthead-container').getBoundingClientRect().bottom && container.style.bottom) {
+                        button.style.setProperty('position', 'fixed');
                         button.style.setProperty('display', 'block');
                     };
                 };
