@@ -450,7 +450,7 @@ function initWatch() {
                 musicText.style.setProperty('color', 'rgb(96,96,100)');
                 musicButton.appendChild(musicText);
                 // inject musicButton into description, but only display if music tracklist content is present on 'show more' click
-                document.querySelector('ytd-expander > ytd-metadata-row-container-renderer').insertBefore(musicButton, document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > d/iv#collapsible'));
+                document.querySelector('ytd-expander > ytd-metadata-row-container-renderer').insertBefore(musicButton, document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible'));
                 document.querySelector('paper-button#more').addEventListener('click', function() {
                     if (document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').querySelectorAll('ytd-metadata-row-renderer').length > 1) {
                         musicButton.style.setProperty('display', 'block');
