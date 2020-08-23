@@ -332,8 +332,8 @@ function initWatch() {
                 });
                 chatObserver.observe(document.querySelector('#secondary-inner'), {attributes: true, subtree: true});
 
-                // create convenient description collapse button
-                // initialize/style button, wrapper container, and inner text
+                // create additional description 'show less' button
+                // initialize/style lessButton, wrapper container, and inner text
                 var container = document.createElement('div');
                 container.style.setProperty('width', '50px');
                 container.style.setProperty('position', 'absolute');
@@ -341,81 +341,129 @@ function initWatch() {
                 container.style.setProperty('top', '67px');
                 container.id = 'extraExpandContainer';
                 container.innerHTML = '&nbsp';
-                var button = document.createElement('button');
-                button.type = 'button';
-                button.style.setProperty('display', 'none');
-                button.style.setProperty('top', `${document.querySelector('#masthead-container').getBoundingClientRect().bottom + 5}px`);
-                button.style.setProperty('height', '200px');
-                button.style.setProperty('width', '50px');
-                button.style.setProperty('border', 'none');
-                button.style.setProperty('cursor', 'pointer');
-                button.classList.add('lessbuttonhover');
-                var buttonStyle = document.createElement('style');
-                var buttonStylesheet = '.lessbuttonhover:hover { background: rgb(170, 170, 170) }';
-                buttonStyle.appendChild(document.createTextNode(buttonStylesheet));
-                document.querySelector('head').appendChild(buttonStyle)
-                button.addEventListener('click', function () { // add click functionality to button
+                var lessButton = document.createElement('button');
+                lessButton.type = 'button';
+                lessButton.style.setProperty('display', 'none');
+                lessButton.style.setProperty('top', `${document.querySelector('#masthead-container').getBoundingClientRect().bottom + 5}px`);
+                lessButton.style.setProperty('height', '200px');
+                lessButton.style.setProperty('width', '50px');
+                lessButton.style.setProperty('border', 'none');
+                lessButton.style.setProperty('cursor', 'pointer');
+                lessButton.classList.add('lessbuttonhover');
+                var lessButtonStyle = document.createElement('style');
+                var lessButtonStylesheet = '.lessbuttonhover:hover { background: rgb(170, 170, 170) }';
+                lessButtonStyle.appendChild(document.createTextNode(lessButtonStylesheet));
+                document.querySelector('head').appendChild(lessButtonStyle)
+                lessButton.addEventListener('click', function () { // add click functionality to lessButton
                     document.querySelector('paper-button#less').click();
-                    if (button.style.position == 'fixed') {
+                    if (lessButton.style.position == 'fixed') {
                         document.querySelector('div#top-row.ytd-video-secondary-info-renderer').scrollIntoView();
                     };
                 });
-                var text = document.createElement('div');
-                text.innerHTML = 'SHOW LESS';
-                text.style.setProperty('transform', 'rotate(-90deg)');
-                text.style.setProperty('transform-origin', '33px 23.5px');
-                text.style.setProperty('white-space', 'nowrap');
-                text.style.setProperty('font-family', 'roboto, arial, sans-serif');
-                text.style.setProperty('font-weight', '500');
-                text.style.setProperty('letter-spacing', '1.6px');
-                text.style.setProperty('word-spacing', '8px');
-                button.appendChild(text);
+                var lessText = document.createElement('div');
+                lessText.innerHTML = 'SHOW LESS';
+                lessText.style.setProperty('transform', 'rotate(-90deg)');
+                lessText.style.setProperty('transform-origin', '33px 23.5px');
+                lessText.style.setProperty('white-space', 'nowrap');
+                lessText.style.setProperty('font-family', 'roboto, arial, sans-serif');
+                lessText.style.setProperty('font-weight', '500');
+                lessText.style.setProperty('letter-spacing', '1.6px');
+                lessText.style.setProperty('word-spacing', '8px');
+                lessButton.appendChild(lessText);
                 var description = document.querySelector('ytd-expander');
                 description.style.setProperty('display', 'inline-block');
                 description.style.setProperty('margin-left', '13px');
                 document.querySelector('div#container.ytd-video-secondary-info-renderer').style.setProperty('position', 'relative');
-                container.appendChild(button);
+                container.appendChild(lessButton);
                 document.querySelector('ytd-video-secondary-info-renderer > div#container').appendChild(container);
                 var buttonEnabled = false;
-                document.querySelector('paper-button#more').addEventListener('click', function() { // inject button on 'show more' click
-                    button.style.setProperty('position', 'unset');
-                    button.style.setProperty('display', 'block');
-                    setButtonDisplay();
-                    buttonEnabled = true;
+                document.querySelector('paper-button#more').addEventListener('click', function() { // inject lessButton on 'show more' click
+                    if (document.querySelector('ytd-expander').getBoundingClientRect().height >= Number(lessButton.style.height.replace('px', ''))) {
+                        lessButton.style.setProperty('position', 'unset');
+                        lessButton.style.setProperty('display', 'block');
+                        setButtonDisplay();
+                        buttonEnabled = true;
+                    };
                 });
-                document.querySelector('paper-button#less').addEventListener('click', function() { // remove button on 'show less' click
-                    button.style.setProperty('display', 'none');
+                document.querySelector('paper-button#less').addEventListener('click', function() { // remove lessButton on 'show less' click
+                    lessButton.style.setProperty('display', 'none');
                     container.style.setProperty('top', '67px');
                     container.style.removeProperty('bottom');
-                    if (button.style.position == 'fixed') {
+                    if (lessButton.style.position == 'fixed') {
                         document.querySelector('div#top-row.ytd-video-secondary-info-renderer').scrollIntoView();
                     };
                     buttonEnabled = false;
                 });
-                document.addEventListener('scroll', function() { // scroll loop for fixed positioning
+                document.addEventListener('scroll', function() { // scroll loop for fixed positioning on lessButton
                     if (buttonEnabled) {
                         setButtonDisplay();
                     };
                 });
-                var setButtonDisplay = function() { // determines and sets position and display properties for button in scroll loop
-                    if (button.getBoundingClientRect().top <= document.querySelector('ytd-expander').getBoundingClientRect().top) {
-                        button.style.setProperty('position', 'unset');
-                        button.style.setProperty('display', 'block');
+                var setButtonDisplay = function() { // determines and sets position and display properties for lessButton in scroll loop
+                    if (lessButton.getBoundingClientRect().top <= document.querySelector('ytd-expander').getBoundingClientRect().top) {
+                        lessButton.style.setProperty('position', 'unset');
+                        lessButton.style.setProperty('display', 'block');
                         container.style.setProperty('top', '67px');
                         container.style.removeProperty('bottom');
-                    } else if (button.getBoundingClientRect().top <= document.querySelector('#masthead-container').getBoundingClientRect().bottom && container.style.top) {
-                        button.style.setProperty('position', 'fixed');
-                        button.style.setProperty('display', 'block');
-                    } else if (button.getBoundingClientRect().bottom >= document.querySelector('ytd-video-secondary-info-renderer').getBoundingClientRect().bottom) {
-                        button.style.setProperty('position', 'unset');
-                        button.style.setProperty('display', 'block');
+                    } else if (lessButton.getBoundingClientRect().top <= document.querySelector('#masthead-container').getBoundingClientRect().bottom && container.style.top) {
+                        lessButton.style.setProperty('position', 'fixed');
+                        lessButton.style.setProperty('display', 'block');
+                    } else if (lessButton.getBoundingClientRect().bottom >= document.querySelector('ytd-video-secondary-info-renderer').getBoundingClientRect().bottom) {
+                        lessButton.style.setProperty('position', 'unset');
+                        lessButton.style.setProperty('display', 'block');
                         container.style.setProperty('bottom', '0px');
                         container.style.removeProperty('top');
-                    } else if (button.getBoundingClientRect().top > document.querySelector('#masthead-container').getBoundingClientRect().bottom && container.style.bottom) {
-                        button.style.setProperty('position', 'fixed');
-                        button.style.setProperty('display', 'block');
+                    } else if (lessButton.getBoundingClientRect().top > document.querySelector('#masthead-container').getBoundingClientRect().bottom && container.style.bottom) {
+                        lessButton.style.setProperty('position', 'fixed');
+                        lessButton.style.setProperty('display', 'block');
                     };
                 };
+
+                // create expand/collapse 'Music in ths video' button if section is present
+                // add style to musicButton
+                var musicButton = document.createElement('div');
+                musicButton.id = 'musicButton';
+                musicButton.style.setProperty('cursor', 'pointer');
+                musicButton.style.setProperty('height', '20px');
+                musicButton.style.setProperty('width', 'auto');
+                musicButton.style.setProperty('display', 'none');
+                musicButton.style.setProperty('position', 'absolute');
+                musicButton.style.setProperty('bottom', '0px');
+                musicButton.style.setProperty('right', `${Number(lessButton.style.width.replace('px', '')) + 10}px`);
+                document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display = 'none';
+                musicButton.addEventListener('click', function() { // add onclick functionality to musicButton
+                    if (document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display == 'none') {
+                        document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display = 'block';
+                    } else {
+                        document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display = 'none';
+                        setButtonDisplay();
+                    };
+                });
+                var musicText = document.createElement('span');
+                musicText.innerHTML = 'Music in this Video';
+                musicText.style.setProperty('white-space', 'nowrap');
+                musicText.style.setProperty('font-family', 'roboto, arial, sans-serif');
+                musicText.style.setProperty('font-size', '1.3rem');
+                musicText.style.setProperty('font-weight', '500');
+                musicText.style.setProperty('letter-spacing', '0.007px');
+                musicText.style.setProperty('text-transform', 'uppercase');
+                musicText.style.setProperty('color', 'rgb(96,96,100)');
+                musicButton.appendChild(musicText);
+                // inject musicButton into description, but only display if music tracklist content is present on 'show more' click
+                document.querySelector('ytd-expander > ytd-metadata-row-container-renderer').insertBefore(musicButton, document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > d/iv#collapsible'));
+                document.querySelector('paper-button#more').addEventListener('click', function() {
+                    if (document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').querySelectorAll('ytd-metadata-row-renderer').length > 1) {
+                        musicButton.style.setProperty('display', 'block');
+                    };
+                });
+                document.querySelector('paper-button#less').addEventListener('click', function() {
+                    musicButton.style.setProperty('display', 'none');
+                    if (document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').querySelectorAll('ytd-metadata-row-renderer').length > 1 && document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display == 'block') {
+                        musicButton.click();
+                        lessButton.style.setProperty('display', 'none');
+                    };
+                });
+
 
                 // on new reccomended videos load
                 var lastReccomendedCount = 0;
