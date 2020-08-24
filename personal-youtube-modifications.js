@@ -187,7 +187,7 @@ function initHomepage () {
                 startedHomepage = true;
                 fixHomepage();
             };
-            // upadate styling on all videos when more are loaded
+            // update styling on all videos when more are loaded
             if (document.querySelectorAll('ytd-rich-item-renderer').length != gridCount) {
                 gridCount = document.querySelectorAll('ytd-rich-item-renderer').length;
                 startedHomepage = true;
@@ -299,9 +299,9 @@ function initWatch() {
                 var chapterBlocksObserver = new MutationObserver(function() {
                     var hoverContainerWidth = document.querySelector('.ytp-chapter-hover-container').style.getPropertyValue('width');
                     if ((hoverContainerWidth == `${originalChapterWidths[0]}px` || hoverContainerWidth == `${originalChapterWidths[0]}%`) && document.querySelector('.ytp-chapters-container').querySelectorAll('.ytp-chapter-hover-container').length > 1) {
-                        GM_log('upadated chapter widths (hopefully not too frequently???');
-                        calculateChapterWidths();
-                        fixWatch();
+                        GM_log('updated chapter widths (hopefully not too frequently???');
+                        // calculateChapterWidths();
+                        // fixWatch();
                     };
                 });
                 chapterBlocksObserver.observe(document.querySelector('.ytp-chapter-hover-container'), {attributes: true});
@@ -386,12 +386,12 @@ function initWatch() {
                     };
                 });
                 document.querySelector('paper-button#less').addEventListener('click', function() { // remove lessButton on 'show less' click
-                    lessButton.style.setProperty('display', 'none');
-                    container.style.setProperty('top', '67px');
-                    container.style.removeProperty('bottom');
-                    if (lessButton.style.position == 'fixed') {
+                    if (lessButton.style.position == 'fixed' || container.style.bottom) {
                         document.querySelector('div#top-row.ytd-video-secondary-info-renderer').scrollIntoView();
                     };
+                    container.style.setProperty('top', '67px');
+                    container.style.removeProperty('bottom');
+                    lessButton.style.setProperty('display', 'none');
                     buttonEnabled = false;
                 });
                 document.addEventListener('scroll', function() { // scroll loop for fixed positioning on lessButton
@@ -408,7 +408,7 @@ function initWatch() {
                     } else if (lessButton.getBoundingClientRect().top <= document.querySelector('#masthead-container').getBoundingClientRect().bottom && container.style.top) {
                         lessButton.style.setProperty('position', 'fixed');
                         lessButton.style.setProperty('display', 'block');
-                    } else if (lessButton.getBoundingClientRect().bottom >= document.querySelector('ytd-video-secondary-info-renderer').getBoundingClientRect().bottom) {
+                    } else if (lessButton.getBoundingClientRect().bottom > document.querySelector('ytd-video-secondary-info-renderer > div#container').getBoundingClientRect().bottom) {
                         lessButton.style.setProperty('position', 'unset');
                         lessButton.style.setProperty('display', 'block');
                         container.style.setProperty('bottom', '0px');
@@ -434,6 +434,7 @@ function initWatch() {
                 musicButton.addEventListener('click', function() { // add onclick functionality to musicButton
                     if (document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display == 'none') {
                         document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display = 'block';
+                        setButtonDisplay();
                     } else {
                         document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display = 'none';
                         setButtonDisplay();
