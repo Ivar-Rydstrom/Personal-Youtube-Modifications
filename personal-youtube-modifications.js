@@ -512,6 +512,10 @@ function initWatch() {
                         fixWatch();
                         lastVidSrc = document.getElementsByClassName('html5-main-video')[0].src;
 
+                        // reset lessButton and musicButton
+                        setButtonDisplay();
+                        lessButton.click();
+
                     };
                 });
                 newVidObserver.observe(document.querySelector("body"), {childList: true, subtree: true});
