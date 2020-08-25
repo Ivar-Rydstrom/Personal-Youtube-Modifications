@@ -13,6 +13,7 @@ var newVideoHeight = newVideoWidth / newVideoAspectRatio;
 
 var startedHomepage = false;
 var startedWatch = false;
+var startedChannel = false;
 var urlUpdated = false;
 var gridCount;
 var lastArgs;
@@ -170,6 +171,15 @@ function fixWatch() {
         document.querySelector('.ytp-chapters-container').querySelector('.ytp-chapter-hover-container').style.removeProperty('display');
     };
     */
+};
+
+
+function fixChannel() {
+    // remove hover-overlays on videos
+    document.querySelectorAll('div#hover-overlays').forEach(function(video) {
+        video.style.setProperty('display', 'none')
+    });
+
 };
 
 
@@ -531,6 +541,20 @@ function initWatch() {
 };
 
 
+function initChannel() {
+    // cal fixChannel() on new videos load
+    var vids;
+    var channelObserver = new MutationObserver(function(mutations, channelObserver) {
+        var newVids = document.querySelector('ytd-grid-renderer > div#items').querySelectorAll('ytd-grid-video-renderer').length;
+        if (newVids != vids) {
+            fixChannel()
+        };
+        vids = newVids;
+    });
+    channelObserver.observe(document.querySelector('ytd-grid-renderer > div#items'), {attributes: true, subtree: true});
+};
+
+
 function initUniversal() { // calls every new page
     // masthead on-load
     var mastheadObserver = new MutationObserver(function(mutations, mastheadObserver) {
@@ -608,6 +632,12 @@ window.addEventListener('load', function() {
             startedWatch = true;
             initWatch();
             lastVidSrc = document.getElementsByClassName('html5-main-video')[0].src;
+        };
+
+        // channel page changes
+        if (window.location.href.includes('/c/') && !startedChannel) {
+            startedChannel = true;
+            initChannel();
         };
 
         // universial changes
