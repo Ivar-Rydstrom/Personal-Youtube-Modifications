@@ -10,10 +10,10 @@
 var newVideoWidth = 900;
 var newVideoAspectRatio = 16/9;
 var newVideoHeight = newVideoWidth / newVideoAspectRatio;
-
 var startedHomepage = false;
 var startedWatch = false;
 var startedChannel = false;
+var startedUniversal = false;
 var urlUpdated = false;
 var gridCount;
 var lastArgs;
@@ -38,10 +38,9 @@ function fixHomepage() {
         });
     };
 
-    // set videos per row to 6, width of video grid to 73% screen width, app drawer width to 10.5%, re-center grid on page
+    // set videos per row to 6, width of video grid to 73% screen width, re-center grid on page
     var inputRenderWidth = 1400/1920*window.innerWidth;
     document.querySelector('ytd-rich-grid-renderer').setAttribute('style', `--ytd-rich-grid-items-per-row: 6; width: ${inputRenderWidth}px; margin: auto`);
-    document.querySelector('ytd-app').style.setProperty('--app-drawer-width', '200px');
     document.querySelector('ytd-page-manager').style.setProperty('margin-left', '200px');
 
     // make video title font size, etc smaller
@@ -76,29 +75,10 @@ function fixHomepage() {
         video.style.setProperty('height', '230px');
     });
 
-    // reduce margin-right on app drawer icons
-    document.querySelectorAll('yt-img-shadow.ytd-guide-entry-renderer').forEach(function(icon) {
-        icon.style.setProperty('margin-right', '8px');
-    });
-    document.querySelectorAll('.guide-icon.ytd-guide-entry-renderer').forEach(function(icon) {
-        icon.style.setProperty('margin-right', '8px');
-    });
-
     // remove add to playlist onhover popups
     document.querySelectorAll('#hover-overlays.ytd-thumbnail').forEach(function(hover) {
         hover.style.setProperty('display', 'none');
     });
-
-    // remove home, trending, subscriptions, and library buttons on app-bar
-    document.querySelector('#header.ytd-guide-collapsible-section-entry-renderer').style.setProperty('display', 'none');
-    document.querySelectorAll('#sections.ytd-guide-renderer > *.ytd-guide-renderer:first-child > #items > ytd-guide-entry-renderer').forEach(function(element) {
-        element.style.setProperty('display', 'none');
-    })
-
-    // move app-bar alignment up
-    document.querySelector('#sections.ytd-guide-renderer > *.ytd-guide-renderer:first-child').style.setProperty('padding-top', '0px');
-    document.querySelector('ytd-guide-renderer.ytd-app').style.setProperty('margin-top', '-12px');
-
 };
 
 
@@ -541,42 +521,70 @@ function initWatch() {
 };
 
 
-function initChannel() {
-    // cal fixChannel() on new videos load
+function initUniversal() {
+    var pageObserver = new MutationObserver(function() { // calls every new page
+        // masthead on-load
+        var mastheadObserver = new MutationObserver(function(mutations, mastheadObserver) {
+            var lastUrl;
+            if (lastUrl != window.location.href) {
+                if (document.querySelector('ytd-masthead') != undefined) {
+
+                    // move search bar to the left side of the screen, widen
+                    document.querySelector('#end.ytd-masthead').style.setProperty('margin-left', 'auto');
+                    document.querySelector('#center.ytd-masthead').style.setProperty('max-width', '900px');
+                    document.querySelector('#guide-button.ytd-masthead').style.setProperty('margin-right', '0px');
+
+                    // remove opacity from masthead bar
+                    document.querySelector('ytd-masthead > #container').style.background = 'white';
+
+                    // reset search when moving to new page
+                    if (!window.location.href.includes('search_query=')) {
+                        document.querySelector('#search-form.ytd-searchbox').reset();
+                    };
+                    mastheadObserver.disconnect();
+                };
+            };
+            lastUrl = window.location.href;
+        });
+        mastheadObserver.observe(document.querySelector('body'), {attributes: true, subtree: true});
+    });
+    pageObserver.observe(document.querySelector("body"), {childList: true, subtree: true});
+
+    // call fixChannel() on new videos load
     var vids;
     var channelObserver = new MutationObserver(function(mutations, channelObserver) {
-        var newVids = document.querySelector('ytd-grid-renderer > div#items').querySelectorAll('ytd-grid-video-renderer').length;
+        var newVids = document.querySelectorAll('ytd-grid-video-renderer').length;
         if (newVids != vids) {
             fixChannel()
         };
         vids = newVids;
     });
-    channelObserver.observe(document.querySelector('ytd-grid-renderer > div#items'), {attributes: true, subtree: true});
-};
+    channelObserver.observe(document.querySelector('body'), {attributes: true, subtree: true});
 
+    // reduce width of app drawer
+    document.querySelector('ytd-app').style.setProperty('--app-drawer-width', '200px');
 
-function initUniversal() { // calls every new page
-    // masthead on-load
-    var mastheadObserver = new MutationObserver(function(mutations, mastheadObserver) {
-        if (document.querySelector('ytd-masthead') != undefined) {
+    // realign channel banner and content for channel page
+    document.querySelector('app-header#header').style.setProperty('left', '200px');
+    document.querySelector('ytd-page-manager#page-manager').style.setProperty('margin-left', '200px');
 
-            // move search bar to the left side of the screen, widen
-            document.querySelector('#end.ytd-masthead').style.setProperty('margin-left', 'auto');
-            document.querySelector('#center.ytd-masthead').style.setProperty('max-width', '900px');
-            document.querySelector('#guide-button.ytd-masthead').style.setProperty('margin-right', '0px');
-
-            // remove opacity from masthead bar
-            document.querySelector('ytd-masthead > #container').style.background = 'white';
-
-            // reset search when moving to new page
-            if (!window.location.href.includes('search_query=')) {
-                document.querySelector('#search-form.ytd-searchbox').reset();
-            };
-
-            mastheadObserver.disconnect();
-        };
+    // reduce margin-right on app drawer icons
+    document.querySelectorAll('yt-img-shadow.ytd-guide-entry-renderer').forEach(function(icon) {
+        icon.style.setProperty('margin-right', '8px');
     });
-    mastheadObserver.observe(document.querySelector('body'), {attributes: true, subtree: true});
+    document.querySelectorAll('.guide-icon.ytd-guide-entry-renderer').forEach(function(icon) {
+        icon.style.setProperty('margin-right', '8px');
+    });
+
+    // remove home, trending, subscriptions, and library buttons on app-bar
+    document.querySelector('#header.ytd-guide-collapsible-section-entry-renderer').style.setProperty('display', 'none');
+    document.querySelectorAll('#sections.ytd-guide-renderer > *.ytd-guide-renderer:first-child > #items > ytd-guide-entry-renderer').forEach(function(element) {
+        element.style.setProperty('display', 'none');
+    })
+
+    // move app-bar alignment up
+    document.querySelector('#sections.ytd-guide-renderer > *.ytd-guide-renderer:first-child').style.setProperty('padding-top', '0px');
+    document.querySelector('ytd-guide-renderer.ytd-app').style.setProperty('margin-top', '-12px');
 };
 
 
@@ -619,7 +627,6 @@ window.addEventListener('load', function() {
     fixUrl();
 
     lastArgs = null;
-    var lastUrl;
     var observer = new MutationObserver(function(mutations) {
         // youtube homepage changes
         if (window.location.href == "https://www.youtube.com/" && !startedHomepage) {
@@ -634,17 +641,11 @@ window.addEventListener('load', function() {
             lastVidSrc = document.getElementsByClassName('html5-main-video')[0].src;
         };
 
-        // channel page changes
-        if (window.location.href.includes('/c/') && !startedChannel) {
-            startedChannel = true;
-            initChannel();
-        };
-
         // universial changes
-        if (lastUrl != window.location.href) {
+        if (!startedUniversal) {
             initUniversal();
+            startedUniversal = true;
         };
-        lastUrl = window.location.href;
 
     });
     observer.observe(document.querySelector("body"), {childList: true, subtree: true});
