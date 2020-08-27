@@ -565,8 +565,10 @@ function initUniversal() {
     document.querySelector('ytd-app').style.setProperty('--app-drawer-width', '200px');
 
     // realign channel banner and content for channel page
-    document.querySelector('app-header#header').style.setProperty('left', '200px');
-    document.querySelector('ytd-page-manager#page-manager').style.setProperty('margin-left', '200px');
+    if (document.querySelector('app-header#header') != undefined) {
+        document.querySelector('app-header#header').style.setProperty('left', '200px');
+        document.querySelector('ytd-page-manager#page-manager').style.setProperty('margin-left', '200px');
+    };
 
     // reduce margin-right on app drawer icons
     document.querySelectorAll('yt-img-shadow.ytd-guide-entry-renderer').forEach(function(icon) {
