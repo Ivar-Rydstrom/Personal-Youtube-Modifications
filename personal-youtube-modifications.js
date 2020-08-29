@@ -522,11 +522,11 @@ function initWatch() {
 
 
 function initUniversal() {
-    var pageObserver = new MutationObserver(function() { // calls every new page
-        // masthead on-load
-        var mastheadObserver = new MutationObserver(function(mutations, mastheadObserver) {
-            var lastUrl;
-            if (lastUrl != window.location.href) {
+    var lastUrl;
+    var pageObserver = new MutationObserver(function() { // calls every new page\
+        if (lastUrl != window.location.href) {
+            // masthead on-load
+            var mastheadObserver = new MutationObserver(function(mutations, mastheadObserver) {
                 if (document.querySelector('ytd-masthead') != undefined) {
 
                     // move search bar to the left side of the screen, widen
@@ -543,10 +543,10 @@ function initUniversal() {
                     };
                     mastheadObserver.disconnect();
                 };
-            };
-            lastUrl = window.location.href;
-        });
-        mastheadObserver.observe(document.querySelector('body'), {attributes: true, subtree: true});
+            });
+            mastheadObserver.observe(document.querySelector('body'), {attributes: true, subtree: true});
+        };
+        lastUrl = window.location.href;
     });
     pageObserver.observe(document.querySelector("body"), {childList: true, subtree: true});
 
@@ -578,15 +578,19 @@ function initUniversal() {
         icon.style.setProperty('margin-right', '8px');
     });
 
-    // remove home, trending, subscriptions, and library buttons on app-bar
-    document.querySelector('#header.ytd-guide-collapsible-section-entry-renderer').style.setProperty('display', 'none');
-    document.querySelectorAll('#sections.ytd-guide-renderer > *.ytd-guide-renderer:first-child > #items > ytd-guide-entry-renderer').forEach(function(element) {
-        element.style.setProperty('display', 'none');
-    })
+    // if app-bar is present
+    if (document.querySelector('#header.ytd-guide-collapsible-section-entry-renderer')) {
 
-    // move app-bar alignment up
-    document.querySelector('#sections.ytd-guide-renderer > *.ytd-guide-renderer:first-child').style.setProperty('padding-top', '0px');
-    document.querySelector('ytd-guide-renderer.ytd-app').style.setProperty('margin-top', '-12px');
+        // remove home, trending, subscriptions, and library buttons on app-bar
+        document.querySelector('#header.ytd-guide-collapsible-section-entry-renderer').style.setProperty('display', 'none');
+        document.querySelectorAll('#sections.ytd-guide-renderer > *.ytd-guide-renderer:first-child > #items > ytd-guide-entry-renderer').forEach(function(element) {
+            element.style.setProperty('display', 'none');
+        });
+
+        // move app-bar alignment up
+        document.querySelector('#sections.ytd-guide-renderer > *.ytd-guide-renderer:first-child').style.setProperty('padding-top', '0px');
+        document.querySelector('ytd-guide-renderer.ytd-app').style.setProperty('margin-top', '-12px');
+    };
 };
 
 
