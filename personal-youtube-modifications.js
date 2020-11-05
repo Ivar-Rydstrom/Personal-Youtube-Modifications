@@ -79,6 +79,11 @@ function fixHomepage() {
     document.querySelectorAll('#hover-overlays.ytd-thumbnail').forEach(function(hover) {
         hover.style.setProperty('display', 'none');
     });
+
+    // remove rich-grid-renderer header
+    if (document.querySelector('#header.ytd-rich-grid-renderer')) {
+        document.querySelector('#header.ytd-rich-grid-renderer').style.setProperty('display', 'none');
+    };
 };
 
 
@@ -151,6 +156,12 @@ function fixWatch() {
         document.querySelector('.ytp-chapters-container').querySelector('.ytp-chapter-hover-container').style.removeProperty('display');
     };
     */
+
+    // gruesomely eradicate the picture in picture mode button
+    if (document.querySelector('button.ytp-miniplayer-button')) {
+        document.querySelector('button.ytp-miniplayer-button').style.setProperty('display', 'none');
+    };
+
 };
 
 
@@ -561,22 +572,7 @@ function initUniversal() {
     });
     channelObserver.observe(document.querySelector('body'), {attributes: true, subtree: true});
 
-    // reduce width of app drawer
-    document.querySelector('ytd-app').style.setProperty('--app-drawer-width', '200px');
 
-    // realign channel banner and content for channel page
-    if (document.querySelector('app-header#header') != undefined) {
-        document.querySelector('app-header#header').style.setProperty('left', '200px');
-        document.querySelector('ytd-page-manager#page-manager').style.setProperty('margin-left', '200px');
-    };
-
-    // reduce margin-right on app drawer icons
-    document.querySelectorAll('yt-img-shadow.ytd-guide-entry-renderer').forEach(function(icon) {
-        icon.style.setProperty('margin-right', '8px');
-    });
-    document.querySelectorAll('.guide-icon.ytd-guide-entry-renderer').forEach(function(icon) {
-        icon.style.setProperty('margin-right', '8px');
-    });
 
     // if app-bar is present
     if (document.querySelector('#header.ytd-guide-collapsible-section-entry-renderer')) {
@@ -590,6 +586,23 @@ function initUniversal() {
         // move app-bar alignment up
         document.querySelector('#sections.ytd-guide-renderer > *.ytd-guide-renderer:first-child').style.setProperty('padding-top', '0px');
         document.querySelector('ytd-guide-renderer.ytd-app').style.setProperty('margin-top', '-12px');
+
+        // reduce width of app drawer
+        document.querySelector('ytd-app').style.setProperty('--app-drawer-width', '200px');
+
+        // realign channel banner and content for channel page
+        if (document.querySelector('app-header#header') != undefined) {
+            document.querySelector('app-header#header').style.setProperty('left', '200px');
+            document.querySelector('ytd-page-manager#page-manager').style.setProperty('margin-left', '200px');
+        };
+
+        // reduce margin-right on app drawer icons
+        document.querySelectorAll('yt-img-shadow.ytd-guide-entry-renderer').forEach(function(icon) {
+            icon.style.setProperty('margin-right', '8px');
+        });
+        document.querySelectorAll('.guide-icon.ytd-guide-entry-renderer').forEach(function(icon) {
+            icon.style.setProperty('margin-right', '8px');
+        });
     };
 };
 
