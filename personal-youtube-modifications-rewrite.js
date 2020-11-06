@@ -8,27 +8,40 @@
 // ==/UserScript==
 
 
-// sets mutator to relaunch script on new page
-var observers = []; // mutation observer handling array
+// set mutator to relaunch script on new page
+var observers = []; // global mutation observer handling array
 var lastPage = window.location.href;
 var scriptRestartObserver = new MutationObserver(function(mutations) {
-    if (window.location.href !== lastPage) {
-        reset_script();
-        lastPage = window.location.href;
+    var progress = document.querySelector('yt-page-navigation-progress');
+    if (progress.getAttribute('aria-valuemax') == progress.getAttribute('aria-valuenow')) { // only reset script if progress bar is 100%
+        if (window.location.href !== lastPage) {
+            reset_script();
+            lastPage = window.location.href;
+        };
     };
 });
-// defines reset script
+
+// define reset script
 function reset_script() {
-    for (var i = 0; i < observers.length; i++) { // disconnect all mutation observers
+    for (var i = 0; i < observers.length; i++) { // disconnect all mutation observers in handling array
         observers[i].disconnect();
     };
     observers = [];
     script(); // relaunch script
 };
-// launch mutator
-window.addEventListener('load', function() {
-    scriptRestartObserver.observe(document.querySelector("body"), {childList: true, subtree: true});
+
+// define and run first-time initializer
+var lazyInitializer = new MutationObserver(function(mutations, lazyInitializer) {
+    if (document.querySelector('ytd-browse, ytd-watch-flexy') != undefined && document.querySelector('yt-page-navigation-progress') != undefined) {
+        script();
+        scriptRestartObserver.observe(document.querySelector('yt-page-navigation-progress'), {attributes: true}); // launch main mutation observer
+        lazyInitializer.disconnect();
+    };
 });
+window.addEventListener('load', function() {
+    lazyInitializer.observe(document.querySelector('body'), {childList: true, subtree: true});
+});
+
 
 
 function script() {
@@ -165,7 +178,7 @@ function script() {
             if (browseArr[i].hasAttribute('page-subtype')) {
                 pageType = browseArr[i].getAttribute('page-subtype');
             } else if (browseArr[i] == document.querySelector('ytd-watch-flexy')) {
-                    pageType = 'watch';
+                pageType = 'watch';
             } else {
                 GM_log('some weird type of page recognized prob do something about this');
             };
@@ -189,10 +202,3 @@ function script() {
     
 
 };
-var lazyInitializer = new MutationObserver(function(mutations, lazyInitializer) {
-    if (document.querySelector('ytd-browse, ytd-watch-flexy')) {
-        script();
-        lazyInitializer.disconnect();
-    };
-});
-lazyInitializer.observe(document.querySelector('body'), {childList: true, subtree: true});
