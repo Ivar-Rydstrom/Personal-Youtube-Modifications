@@ -170,15 +170,39 @@ function script() {
     
     };
 
+    function fixWatchPlaylist() {
+        document.querySelector('#playlist').toggleAttribute('collapsed');
+        if (document.querySelector('#abort-playlist') == undefined) {
+            var abortPlaylistButton = document.createElement('div');
+            abortPlaylistButton.id = 'abort-playlist';
+            abortPlaylistButton.style.setProperty('cursor', 'pointer');
+            abortPlaylistButton.style.setProperty('height', '60px');
+            abortPlaylistButton.style.setProperty('position', 'relative');
+            var abortPlaylistButtonText = document.createElement('span');
+            abortPlaylistButtonText.innerHTML = 'EXIT PLAYLIST';
+            abortPlaylistButtonText.style.setProperty('margin', '0');
+            abortPlaylistButtonText.style.setProperty('display', 'block');
+            abortPlaylistButtonText.style.setProperty('position', 'relative');
+            abortPlaylistButtonText.style.setProperty('top', '50%');
+            abortPlaylistButtonText.style.setProperty('transform', 'translateY(-50%)');
+            abortPlaylistButton.appendChild(abortPlaylistButtonText);
+            document.querySelector('#header-top-row').insertBefore(abortPlaylistButton, document.querySelector('#header-top-row > #expand-button'));
+        };
+    };
+
     // determines current page type
     var pageType;
     var browseArr = document.querySelectorAll('ytd-browse, ytd-watch-flexy');
     for (var i = 0; i < browseArr.length; i ++) {
         if (browseArr[i].getAttribute('role') == 'main') {
-            if (browseArr[i].hasAttribute('page-subtype')) {
+            if (browseArr[i].hasAttribute('page-subtype')) { // ytd-browse page types
                 pageType = browseArr[i].getAttribute('page-subtype');
-            } else if (browseArr[i] == document.querySelector('ytd-watch-flexy')) {
-                pageType = 'watch';
+            } else if (browseArr[i] == document.querySelector('ytd-watch-flexy')) { // watch page type
+                if (document.querySelector('ytd-watch-flexy').hasAttribute('playlist')) {
+                    pageType = 'watch-playlist';
+                } else {
+                    pageType = 'watch';
+                };
             } else {
                 GM_log('some weird type of page recognized prob do something about this');
             };
@@ -195,6 +219,13 @@ function script() {
         case 'watch':
             GM_log('watch');
             // fixWatch();
+            break;
+        case 'watch-playlist':
+            GM_log('watch-playlist');
+            fixWatchPlaylist();
+            break;
+        case 'playlist': // (playlist summary, not watch screen)
+            GM_log('playlist');
             break;
         default:
             GM_log('strange pagetype recieved', pageType);
