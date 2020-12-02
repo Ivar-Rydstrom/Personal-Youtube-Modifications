@@ -111,12 +111,6 @@ function script() {
     
     //define watch page script
     function fixWatch() {
-        var defaultPlayerWidth = Number(document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('width').replace('px', ''));
-        var defaultPlayerHeight = Number(document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('height').replace('px', ''));
-        var newVideoWidth = 900;
-        var newVideoAspectRatio = 16/9;
-        var newVideoHeight = newVideoWidth / newVideoAspectRatio;
-
         // make view-count font larger
         document.querySelector('yt-view-count-renderer').style.setProperty('font-size', '1.7rem');
 
@@ -216,50 +210,52 @@ function script() {
         lessButton.click();
 
         // create expand/collapse 'Music in ths video' button if section is present
-        // add style to musicButton
-        var musicButton = document.createElement('div');
-        musicButton.id = 'musicButton';
-        musicButton.style.setProperty('cursor', 'pointer');
-        musicButton.style.setProperty('height', '20px');
-        musicButton.style.setProperty('width', 'auto');
-        musicButton.style.setProperty('display', 'none');
-        musicButton.style.setProperty('position', 'absolute');
-        musicButton.style.setProperty('bottom', '0px');
-        musicButton.style.setProperty('right', `${Number(lessButton.style.width.replace('px', '')) + 10}px`);
-        document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display = 'none';
-        musicButton.addEventListener('click', function() { // add onclick functionality to musicButton
-            if (document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display == 'none') {
-                document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display = 'block';
-                setButtonDisplay();
-            } else {
-                document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display = 'none';
-                setButtonDisplay();
-            };
-        });
-        var musicText = document.createElement('span');
-        musicText.innerHTML = 'Music in this Video';
-        musicText.style.setProperty('white-space', 'nowrap');
-        musicText.style.setProperty('font-family', 'roboto, arial, sans-serif');
-        musicText.style.setProperty('font-size', '1.3rem');
-        musicText.style.setProperty('font-weight', '500');
-        musicText.style.setProperty('letter-spacing', '0.007px');
-        musicText.style.setProperty('text-transform', 'uppercase');
-        musicText.style.setProperty('color', 'rgb(96,96,100)');
-        musicButton.appendChild(musicText);
-        // inject musicButton into description, but only display if music tracklist content is present on 'show more' click
-        document.querySelector('ytd-expander > ytd-metadata-row-container-renderer').insertBefore(musicButton, document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible'));
-        document.querySelector('paper-button#more').addEventListener('click', function() {
-            if (document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').querySelectorAll('ytd-metadata-row-renderer').length > 1) {
-                musicButton.style.setProperty('display', 'block');
-            };
-        });
-        document.querySelector('paper-button#less').addEventListener('click', function() {
+        if (document.querySelector('#musicButton') == undefined) {
+            // add style to musicButton
+            var musicButton = document.createElement('div');
+            musicButton.id = 'musicButton';
+            musicButton.style.setProperty('cursor', 'pointer');
+            musicButton.style.setProperty('height', '20px');
+            musicButton.style.setProperty('width', 'auto');
             musicButton.style.setProperty('display', 'none');
-            if (document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').querySelectorAll('ytd-metadata-row-renderer').length > 1 && document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display == 'block') {
-                musicButton.click();
-                lessButton.style.setProperty('display', 'none');
-            };
-        });
+            musicButton.style.setProperty('position', 'absolute');
+            musicButton.style.setProperty('bottom', '0px');
+            musicButton.style.setProperty('right', `${Number(lessButton.style.width.replace('px', '')) + 10}px`);
+            document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display = 'none';
+            musicButton.addEventListener('click', function() { // add onclick functionality to musicButton
+                if (document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display == 'none') {
+                    document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display = 'block';
+                    setButtonDisplay();
+                } else {
+                    document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display = 'none';
+                    setButtonDisplay();
+                };
+            });
+            var musicText = document.createElement('span');
+            musicText.innerHTML = 'Music in this Video';
+            musicText.style.setProperty('white-space', 'nowrap');
+            musicText.style.setProperty('font-family', 'roboto, arial, sans-serif');
+            musicText.style.setProperty('font-size', '1.3rem');
+            musicText.style.setProperty('font-weight', '500');
+            musicText.style.setProperty('letter-spacing', '0.007px');
+            musicText.style.setProperty('text-transform', 'uppercase');
+            musicText.style.setProperty('color', 'rgb(96,96,100)');
+            musicButton.appendChild(musicText);
+            // inject musicButton into description, but only display if music tracklist content is present on 'show more' click
+            document.querySelector('ytd-expander > ytd-metadata-row-container-renderer').insertBefore(musicButton, document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible'));
+            document.querySelector('paper-button#more').addEventListener('click', function() {
+                if (document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').querySelectorAll('ytd-metadata-row-renderer').length > 1) {
+                    musicButton.style.setProperty('display', 'block');
+                };
+            });
+            document.querySelector('paper-button#less').addEventListener('click', function() {
+                musicButton.style.setProperty('display', 'none');
+                if (document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').querySelectorAll('ytd-metadata-row-renderer').length > 1 && document.querySelector('ytd-expander > ytd-metadata-row-container-renderer > div#collapsible').style.display == 'block') {
+                    musicButton.click();
+                    lessButton.style.setProperty('display', 'none');
+                };
+            });
+        };
 
         // remove annoying popups on /watch reccomended videos
         var lastReccomendedCount = 0;
@@ -273,55 +269,81 @@ function script() {
         reccomendedLoadObserver.observe(document.querySelector('#items.ytd-watch-next-secondary-results-renderer'), {attributes: true, subtree: true});
         observers.push(reccomendedLoadObserver);
 
-        // // change video width/height
-        // var primaryStyle = `--ytd-watch-flexy-max-player-width:${newVideoWidth}px;--ytd-watch-flexy-max-player-height:${newVideoHeight}px;--ytd-watch-flexy-min-player-width:${newVideoWidth}px;--ytd-watch-flexy-min-player-height:${newVideoHeight}px;max-width:${newVideoWidth}px`;
-        // if (document.querySelector('#primary.ytd-watch-flexy') != undefined) {
-        //     document.querySelector('#primary.ytd-watch-flexy').setAttribute('style', primaryStyle);
-        // };
-        // var player = document.querySelector('#player.ytd-watch-flexy');
-        // player.style.setProperty('width', `${newVideoWidth}px`);
-        // player.style.setProperty('height', `${newVideoHeight}px`);
-        // player.style.setProperty('background-color', 'black');
-        // var wrapper = document.getElementsByClassName('html5-video-player')[0];
-        // wrapper.style.setProperty('width', `${newVideoWidth}px`);
-        // wrapper.style.setProperty('height', `${newVideoHeight}px`);
-        // document.querySelector('#player-container-inner').style.setProperty('padding-top', '0px');
-    
+        // change video width/height
+        var defaultPlayerWidth = Number(document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('width').replace('px', ''));
+        var defaultPlayerHeight = Number(document.getElementsByClassName('html5-main-video')[0].style.getPropertyValue('height').replace('px', ''));
+        var newVideoWidth = 900;
+        var newVideoAspectRatio = 16/9;
+        var newVideoHeight = newVideoWidth / newVideoAspectRatio;
+        var somethingRatio = newVideoHeight/defaultPlayerHeight;
+
+        var primaryStyle = `--ytd-watch-flexy-max-player-width:${newVideoWidth}px;--ytd-watch-flexy-max-player-height:${newVideoHeight}px;--ytd-watch-flexy-min-player-width:${newVideoWidth}px;--ytd-watch-flexy-min-player-height:${newVideoHeight}px;max-width:${newVideoWidth}px`;
+        document.querySelector('#primary.ytd-watch-flexy').setAttribute('style', primaryStyle);
+        var player = document.querySelector('#player.ytd-watch-flexy');
+        player.style.setProperty('width', `${newVideoWidth}px`);
+        player.style.setProperty('height', `${newVideoHeight}px`);
+        player.style.setProperty('background-color', 'black');
+        var wrapper = document.querySelector('.html5-video-player');
+        wrapper.style.setProperty('width', `${newVideoWidth}px`);
+        wrapper.style.setProperty('height', `${newVideoHeight}px`);
+        document.querySelector('#player-container-inner').style.setProperty('padding-top', '0px');
+
+        // handle fullscreen mode
+        var updatedFullscreen = false;
+        var fullscreenObserver = new MutationObserver(function(mutations, fullscreenObserver) {
+            if (document.querySelector('#player-theater-container').querySelector('video') != undefined) { // if fullscreen player present
+                    if (!updatedFullscreen && document.querySelector('.html5-main-video').style.getPropertyValue('width') != `${screen.width}px`) {
+                        updatedFullscreen = true;
+                        fullscreenMode = true;
+                        applyVidScale();
+                    };
+            } else {
+                if (updatedFullscreen) {
+                    updatedFullscreen = false;
+                    fullscreenMode = false;
+                    applyVidScale();
+                };
+            };
+        });
+        fullscreenObserver.observe(document.querySelector('.html5-video-player'), {attributes: true});
+        observers.push(fullscreenObserver);
+        function applyVidScale() {
+            if (!fullscreenMode) { // standard player
+                // rescale main video and progress bar
+                document.getElementsByClassName('html5-main-video')[0].style.width = `${newVideoWidth}px`;
+                document.getElementsByClassName('html5-main-video')[0].style.height = `${newVideoHeight}px`;
+                document.getElementsByClassName('html5-main-video')[0].style.setProperty('left', '0px');
+                document.getElementsByClassName('ytp-chrome-bottom')[0].style.width = `${newVideoWidth - 24 + 4}px`;
+                document.getElementsByClassName('ytp-chapter-hover-container')[0].style.width = `${newVideoWidth - 24}px`;
+        
+                // rescale all end-cards
+                document.querySelectorAll('.ytp-ce-element').forEach(function(element) {
+                    if (element.getAttribute('orig-width') == undefined) {
+                        element.setAttribute('orig-width', element.style.width);
+                        element.setAttribute('orig-height', element.style.height);
+                        element.setAttribute('orig-left', element.style.left);
+                        element.setAttribute('orig-top', element.style.top);
+                    };
+                    element.style.width = `${element.getAttribute('orig-width').replace('px', '') * somethingRatio}px`;
+                    element.style.height = `${element.getAttribute('orig-height').replace('px', '') * somethingRatio}px`;
+                    element.style.left = `${element.getAttribute('orig-left').replace('px', '') * somethingRatio}px`;
+                    element.style.top = `${element.getAttribute('orig-top').replace('px', '') * somethingRatio}px`;
+                });
+            } else { // fullscreen mode
+                // rescale main video and progress bar
+                document.querySelector('.html5-video-player').style.setProperty('width', '100%');
+                document.querySelector('.html5-video-player').style.setProperty('height', '100%');
+                document.querySelector('.html5-main-video').style.setProperty('width', `${screen.width}px`);
+                document.querySelector('.html5-main-video').style.setProperty('height', `${screen.height}px`);
+            };
+        };
+        // applyVidScale();
+
         // // rescale framepreview content
-        // var somethingRatio = newVideoHeight/defaultPlayerHeight;
         // document.querySelector('.ytp-storyboard-framepreview').style.setProperty('margin', 'auto');
         // document.querySelector('.ytp-storyboard-framepreview').style.setProperty('position', 'relative');
         // document.querySelector('.ytp-storyboard-framepreview-img').style.setProperty('transform', `scale(${somethingRatio})`);
         // document.querySelector('.ytp-storyboard-framepreview-img').style.setProperty('transform-origin', 'left top');
-    
-        // if (!fullscreenMode) { // standard player
-        //     // rescale main video and progress bar
-        //     document.getElementsByClassName('html5-main-video')[0].style.width = `${newVideoWidth}px`;
-        //     document.getElementsByClassName('html5-main-video')[0].style.height = `${newVideoHeight}px`;
-        //     document.getElementsByClassName('html5-main-video')[0].style.setProperty('left', '0px');
-        //     // document.getElementsByClassName('ytp-chrome-bottom')[0].style.width = `${newVideoWidth - 24 + 4}px`;
-        //     // document.getElementsByClassName('ytp-chapter-hover-container')[0].style.width = `${newVideoWidth - 24}px`;
-    
-        //     // rescale all end-cards
-        //     document.querySelectorAll('.ytp-ce-element').forEach(function(element) {
-        //         if (element.getAttribute('orig-width') == undefined) {
-        //             element.setAttribute('orig-width', element.style.width);
-        //             element.setAttribute('orig-height', element.style.height);
-        //             element.setAttribute('orig-left', element.style.left);
-        //             element.setAttribute('orig-top', element.style.top);
-        //         };
-        //         element.style.width = `${element.getAttribute('orig-width').replace('px', '') * somethingRatio}px`;
-        //         element.style.height = `${element.getAttribute('orig-height').replace('px', '') * somethingRatio}px`;
-        //         element.style.left = `${element.getAttribute('orig-left').replace('px', '') * somethingRatio}px`;
-        //         element.style.top = `${element.getAttribute('orig-top').replace('px', '') * somethingRatio}px`;
-        //     });
-        // } else { // fullscreen mode
-        //     // rescale main video and progress bar
-        //     document.querySelector('.html5-video-player').style.setProperty('width', '100%');
-        //     document.querySelector('.html5-video-player').style.setProperty('height', '100%');
-        //     document.querySelector('.html5-main-video').style.setProperty('width', `${screen.width}px`);
-        //     document.querySelector('.html5-main-video').style.setProperty('height', `${screen.height}px`);
-        // };
     
         // gruesomely eradicate the picture in picture mode button
         if (document.querySelector('button.ytp-miniplayer-button')) {
@@ -331,14 +353,15 @@ function script() {
     };
 
     function fixWatchPlaylist() {
-        document.querySelector('#playlist').toggleAttribute('collapsed');
+        // widen default collapse playlist
+        document.querySelector('#expand-button').style.setProperty('width', '50px');
+        // add abort playlist button
         if (document.querySelector('#abort-playlist') == undefined) {
             var abortPlaylistButton = document.createElement('div');
             abortPlaylistButton.id = 'abort-playlist';
             abortPlaylistButton.style.setProperty('cursor', 'pointer');
             abortPlaylistButton.style.setProperty('height', '60px');
             abortPlaylistButton.style.setProperty('position', 'relative');
-            abortPlaylistButton.style.setProperty('left', '20px');
             abortPlaylistButton.addEventListener('click', function() {
                 var vidID = document.querySelector('ytd-watch-flexy').getAttribute('video-id');
                 window.location.href = `https://www.youtube.com/watch?v=${vidID}`;
