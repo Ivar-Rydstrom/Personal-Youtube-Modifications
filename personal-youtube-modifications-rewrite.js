@@ -288,56 +288,80 @@ function script() {
         wrapper.style.setProperty('height', `${newVideoHeight}px`);
         document.querySelector('#player-container-inner').style.setProperty('padding-top', '0px');
 
-        // handle fullscreen mode
-        var updatedFullscreen = false;
-        var fullscreenObserver = new MutationObserver(function(mutations, fullscreenObserver) {
-            if (document.querySelector('#player-theater-container').querySelector('video') != undefined) { // if fullscreen player present
-                    if (!updatedFullscreen && document.querySelector('.html5-main-video').style.getPropertyValue('width') != `${screen.width}px`) {
-                        updatedFullscreen = true;
-                        fullscreenMode = true;
-                        applyVidScale();
-                    };
-            } else {
-                if (updatedFullscreen) {
-                    updatedFullscreen = false;
-                    fullscreenMode = false;
-                    applyVidScale();
-                };
-            };
-        });
-        fullscreenObserver.observe(document.querySelector('.html5-video-player'), {attributes: true});
-        observers.push(fullscreenObserver);
-        function applyVidScale() {
-            if (!fullscreenMode) { // standard player
-                // rescale main video and progress bar
-                document.getElementsByClassName('html5-main-video')[0].style.width = `${newVideoWidth}px`;
-                document.getElementsByClassName('html5-main-video')[0].style.height = `${newVideoHeight}px`;
-                document.getElementsByClassName('html5-main-video')[0].style.setProperty('left', '0px');
-                document.getElementsByClassName('ytp-chrome-bottom')[0].style.width = `${newVideoWidth - 24 + 4}px`;
-                document.getElementsByClassName('ytp-chapter-hover-container')[0].style.width = `${newVideoWidth - 24}px`;
+        // // handle fullscreen mode
+        // var updatedFullscreen = false;
+        // var fullscreenObserver = new MutationObserver(function(mutations, fullscreenObserver) {
+        //     if (true) { //!updatedFullscreen && document.querySelector('.html5-main-video').style.getPropertyValue('width') != `${screen.width}px` && false == true
+        //         updatedFullscreen = true;
+        //         fullscreenMode = false; // true
+        //         applyVidScale();
+        //     } else if (updatedFullscreen) {
+        //         updatedFullscreen = false;
+        //         fullscreenMode = false;
+        //         applyVidScale();
+        //     };
+        // });
+        // fullscreenObserver.observe(document.querySelector('.html5-video-player'), {attributes: true});
+        // observers.push(fullscreenObserver);
+        // function applyVidScale() {
+        //     if (!fullscreenMode) { // standard player
+        //         // rescale main video and progress bar
+        //         GM_log(newVideoWidth, newVideoHeight);
+        //         document.getElementsByClassName('html5-main-video')[0].style.width = `${newVideoWidth}px`;
+        //         document.getElementsByClassName('html5-main-video')[0].style.height = `${newVideoHeight}px`;
+        //         document.getElementsByClassName('html5-main-video')[0].style.setProperty('left', '0px');
+        //         document.getElementsByClassName('ytp-chrome-bottom')[0].style.width = `${newVideoWidth - 24 + 4}px`;
+        //         document.getElementsByClassName('ytp-chapter-hover-container')[0].style.width = `${newVideoWidth - 24}px`;
         
-                // rescale all end-cards
-                document.querySelectorAll('.ytp-ce-element').forEach(function(element) {
-                    if (element.getAttribute('orig-width') == undefined) {
-                        element.setAttribute('orig-width', element.style.width);
-                        element.setAttribute('orig-height', element.style.height);
-                        element.setAttribute('orig-left', element.style.left);
-                        element.setAttribute('orig-top', element.style.top);
-                    };
-                    element.style.width = `${element.getAttribute('orig-width').replace('px', '') * somethingRatio}px`;
-                    element.style.height = `${element.getAttribute('orig-height').replace('px', '') * somethingRatio}px`;
-                    element.style.left = `${element.getAttribute('orig-left').replace('px', '') * somethingRatio}px`;
-                    element.style.top = `${element.getAttribute('orig-top').replace('px', '') * somethingRatio}px`;
-                });
-            } else { // fullscreen mode
-                // rescale main video and progress bar
-                document.querySelector('.html5-video-player').style.setProperty('width', '100%');
-                document.querySelector('.html5-video-player').style.setProperty('height', '100%');
-                document.querySelector('.html5-main-video').style.setProperty('width', `${screen.width}px`);
-                document.querySelector('.html5-main-video').style.setProperty('height', `${screen.height}px`);
-            };
+        //         // rescale all end-cards
+        //         document.querySelectorAll('.ytp-ce-element').forEach(function(element) {
+        //             if (element.getAttribute('orig-width') == undefined) {
+        //                 element.setAttribute('orig-width', element.style.width);
+        //                 element.setAttribute('orig-height', element.style.height);
+        //                 element.setAttribute('orig-left', element.style.left);
+        //                 element.setAttribute('orig-top', element.style.top);
+        //             };
+        //             element.style.width = `${element.getAttribute('orig-width').replace('px', '') * somethingRatio}px`;
+        //             element.style.height = `${element.getAttribute('orig-height').replace('px', '') * somethingRatio}px`;
+        //             element.style.left = `${element.getAttribute('orig-left').replace('px', '') * somethingRatio}px`;
+        //             element.style.top = `${element.getAttribute('orig-top').replace('px', '') * somethingRatio}px`;
+        //         });
+        //     } else { // fullscreen mode
+        //         // rescale main video and progress bar
+        //         document.querySelector('.html5-video-player').style.setProperty('width', '100%');
+        //         document.querySelector('.html5-video-player').style.setProperty('height', '100%');
+        //         document.querySelector('.html5-main-video').style.setProperty('width', `${screen.width}px`);
+        //         document.querySelector('.html5-main-video').style.setProperty('height', `${screen.height}px`);
+        //     };
+        // };
+        // // applyVidScale();
+
+        // rescale video dimentions
+        function applyVidScale() {
+            // rescale main video and progress bar
+            GM_log(newVideoWidth, newVideoHeight);
+            document.getElementsByClassName('html5-main-video')[0].style.width = `${newVideoWidth}px`;
+            document.getElementsByClassName('html5-main-video')[0].style.height = `${newVideoHeight}px`;
+            document.getElementsByClassName('html5-main-video')[0].style.setProperty('left', '0px');
+            document.getElementsByClassName('ytp-chrome-bottom')[0].style.width = `${newVideoWidth - 24 + 4}px`;
+            document.getElementsByClassName('ytp-chapter-hover-container')[0].style.width = `${newVideoWidth - 24}px`;
+    
+            // rescale all end-cards
+            document.querySelectorAll('.ytp-ce-element').forEach(function(element) {
+                if (element.getAttribute('orig-width') == undefined) {
+                    element.setAttribute('orig-width', element.style.width);
+                    element.setAttribute('orig-height', element.style.height);
+                    element.setAttribute('orig-left', element.style.left);
+                    element.setAttribute('orig-top', element.style.top);
+                };
+                element.style.width = `${element.getAttribute('orig-width').replace('px', '') * somethingRatio}px`;
+                element.style.height = `${element.getAttribute('orig-height').replace('px', '') * somethingRatio}px`;
+                element.style.left = `${element.getAttribute('orig-left').replace('px', '') * somethingRatio}px`;
+                element.style.top = `${element.getAttribute('orig-top').replace('px', '') * somethingRatio}px`;
+            });
         };
-        // applyVidScale();
+        applyVidScale();
+
 
         // // rescale framepreview content
         // document.querySelector('.ytp-storyboard-framepreview').style.setProperty('margin', 'auto');
